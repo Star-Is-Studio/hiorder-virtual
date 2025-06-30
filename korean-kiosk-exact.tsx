@@ -35,13 +35,17 @@ interface FoodItem {
   badge?: string
 }
 
-export default function Component() {
+interface ComponentProps {
+  initialStoreName?: string
+}
+
+export default function Component({ initialStoreName }: ComponentProps = {}) {
   const [activeTab, setActiveTab] = useState("메인메뉴")
   const [orderItems, setOrderItems] = useState<OrderItem[]>([])
   const [showOrderHistory, setShowOrderHistory] = useState(false)
   const [showOrderConfirm, setShowOrderConfirm] = useState(false)
   const [showStoreSettings, setShowStoreSettings] = useState(false)
-  const [storeName, setStoreName] = useState("식당명")
+  const [storeName, setStoreName] = useState(initialStoreName || "식당명")
   const [storeAddress, setStoreAddress] = useState("")
   const [tempStoreName, setTempStoreName] = useState("")
   const [tempStoreAddress, setTempStoreAddress] = useState("")
