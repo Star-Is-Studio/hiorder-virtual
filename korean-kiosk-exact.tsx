@@ -277,21 +277,56 @@ export default function Component() {
             font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
             background: rgb(229, 231, 235);
             width: 100vw;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 10%;
+            padding: 8px;
+        }
+        @media (min-width: 640px) {
+            body { padding: 16px; }
+        }
+        @media (min-width: 768px) {
+            body { padding: 32px; }
+        }
+        @media (min-width: 1024px) {
+            body { padding: 10%; }
         }
         .kiosk-container {
             background: rgb(31, 41, 55);
-            border-radius: 24px;
-            padding: 16px 20px;
+            border-radius: 12px;
+            padding: 8px 12px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             aspect-ratio: 4/3;
             width: 100%;
-            max-width: 1152px;
+            max-width: 320px;
             height: auto;
+        }
+        @media (min-width: 640px) {
+            .kiosk-container {
+                border-radius: 16px;
+                padding: 12px 16px;
+                max-width: 512px;
+            }
+        }
+        @media (min-width: 768px) {
+            .kiosk-container {
+                border-radius: 20px;
+                padding: 16px 20px;
+                max-width: 672px;
+            }
+        }
+        @media (min-width: 1024px) {
+            .kiosk-container {
+                border-radius: 24px;
+                padding: 16px 20px;
+                max-width: 896px;
+            }
+        }
+        @media (min-width: 1280px) {
+            .kiosk-container {
+                max-width: 1152px;
+            }
         }
         .kiosk-content {
             width: 100%;
@@ -303,42 +338,110 @@ export default function Component() {
             position: relative;
         }
         .sidebar {
-            width: 144px;
-            min-width: 144px;
+            width: 80px;
+            min-width: 80px;
             background: rgb(31, 41, 55);
             color: white;
             display: flex;
             flex-direction: column;
             position: relative;
         }
+        @media (min-width: 640px) {
+            .sidebar {
+                width: 96px;
+                min-width: 96px;
+            }
+        }
+        @media (min-width: 768px) {
+            .sidebar {
+                width: 128px;
+                min-width: 128px;
+            }
+        }
+        @media (min-width: 1024px) {
+            .sidebar {
+                width: 144px;
+                min-width: 144px;
+            }
+        }
         .logo-section {
-            padding: 16px;
+            padding: 8px;
             text-align: center;
             background: rgba(34, 34, 34, 1);
+        }
+        @media (min-width: 640px) {
+            .logo-section { padding: 12px; }
+        }
+        @media (min-width: 768px) {
+            .logo-section { padding: 16px; }
         }
         .logo {
             background: white;
             color: black;
-            border-radius: 12px;
+            border-radius: 8px;
             font-weight: bold;
-            font-size: 30px;
-            line-height: 32px;
+            font-size: 14px;
+            line-height: 16px;
             text-align: center;
             letter-spacing: 0.025em;
-            padding: 16px;
-            margin-bottom: 16px;
-            margin-top: 16px;
+            padding: 8px;
+            margin-bottom: 8px;
+            margin-top: 8px;
             margin-left: 1px;
             margin-right: 2px;
+        }
+        @media (min-width: 640px) {
+            .logo {
+                border-radius: 10px;
+                font-size: 18px;
+                line-height: 20px;
+                padding: 12px;
+                margin-bottom: 12px;
+                margin-top: 12px;
+            }
+        }
+        @media (min-width: 768px) {
+            .logo {
+                border-radius: 12px;
+                font-size: 24px;
+                line-height: 26px;
+                padding: 16px;
+                margin-bottom: 16px;
+                margin-top: 16px;
+            }
+        }
+        @media (min-width: 1024px) {
+            .logo {
+                font-size: 30px;
+                line-height: 32px;
+            }
         }
         .store-name {
             color: white;
             font-weight: bold;
-            margin-bottom: 24px;
-            font-size: 24px;
+            margin-bottom: 12px;
+            font-size: 12px;
             white-space: pre-wrap;
             text-align: center;
             line-height: 1.25;
+        }
+        @media (min-width: 640px) {
+            .store-name {
+                margin-bottom: 16px;
+                font-size: 14px;
+            }
+        }
+        @media (min-width: 768px) {
+            .store-name {
+                margin-bottom: 20px;
+                font-size: 18px;
+            }
+        }
+        @media (min-width: 1024px) {
+            .store-name {
+                margin-bottom: 24px;
+                font-size: 24px;
+            }
         }
         .menu-section {
             flex: 1;
@@ -354,31 +457,77 @@ export default function Component() {
         .menu-item {
             display: flex;
             align-items: center;
-            padding: 12px 16px;
+            padding: 8px 8px;
             border-left: 4px solid rgb(6, 182, 212);
-            margin-left: 8px;
-            margin-right: 8px;
+            margin-left: 4px;
+            margin-right: 4px;
             border-radius: 0 4px 4px 0;
             background: rgba(61, 61, 61, 1);
             white-space: nowrap;
         }
+        @media (min-width: 640px) {
+            .menu-item {
+                padding: 10px 12px;
+                margin-left: 6px;
+                margin-right: 6px;
+            }
+        }
+        @media (min-width: 768px) {
+            .menu-item {
+                padding: 12px 16px;
+                margin-left: 8px;
+                margin-right: 8px;
+            }
+        }
         .bell-icon {
-            margin-right: 8px;
-            width: 24px;
-            height: 24px;
+            margin-right: 4px;
+            width: 12px;
+            height: 12px;
             object-fit: contain;
             filter: brightness(0) invert(1);
         }
+        @media (min-width: 640px) {
+            .bell-icon {
+                margin-right: 6px;
+                width: 16px;
+                height: 16px;
+            }
+        }
+        @media (min-width: 768px) {
+            .bell-icon {
+                margin-right: 8px;
+                width: 20px;
+                height: 20px;
+            }
+        }
+        @media (min-width: 1024px) {
+            .bell-icon {
+                width: 24px;
+                height: 24px;
+            }
+        }
         .menu-text {
-            font-size: 16px;
+            font-size: 12px;
             letter-spacing: normal;
             font-weight: 800;
-            line-height: 2.5;
+            line-height: 1.5;
             white-space: nowrap;
+        }
+        @media (min-width: 640px) {
+            .menu-text {
+                font-size: 14px;
+                line-height: 2;
+            }
+        }
+        @media (min-width: 768px) {
+            .menu-text {
+                font-size: 16px;
+                line-height: 2.5;
+            }
         }
         .call-button {
             position: absolute;
-            bottom: 24px;
+            bottom: 12px;
             left: 50%;
             transform: translateX(-50%);
             background: rgb(6, 182, 212);
@@ -386,17 +535,44 @@ export default function Component() {
             font-weight: bold;
             border-radius: 9999px;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            font-size: 20px;
-            line-height: 28px;
+            font-size: 12px;
+            line-height: 12px;
             letter-spacing: normal;
-            height: 96px;
-            width: 96px;
+            height: 48px;
+            width: 48px;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
             border: none;
             cursor: pointer;
+        }
+        @media (min-width: 640px) {
+            .call-button {
+                bottom: 16px;
+                font-size: 14px;
+                line-height: 16px;
+                height: 64px;
+                width: 64px;
+            }
+        }
+        @media (min-width: 768px) {
+            .call-button {
+                bottom: 20px;
+                font-size: 16px;
+                line-height: 20px;
+                height: 80px;
+                width: 80px;
+            }
+        }
+        @media (min-width: 1024px) {
+            .call-button {
+                bottom: 24px;
+                font-size: 20px;
+                line-height: 28px;
+                height: 96px;
+                width: 96px;
+            }
         }
         .call-button:hover {
             background: rgb(8, 145, 178);
@@ -412,18 +588,56 @@ export default function Component() {
         }
         .tabs {
             display: flex;
-            padding-left: 24px;
-            padding-top: 16px;
+            padding-left: 8px;
+            padding-top: 8px;
+        }
+        @media (min-width: 640px) {
+            .tabs {
+                padding-left: 12px;
+                padding-top: 12px;
+            }
+        }
+        @media (min-width: 768px) {
+            .tabs {
+                padding-left: 16px;
+                padding-top: 16px;
+            }
+        }
+        @media (min-width: 1024px) {
+            .tabs {
+                padding-left: 24px;
+            }
         }
         .tab {
-            padding: 12px 24px;
-            font-size: 18px;
+            padding: 8px 8px;
+            font-size: 12px;
             font-weight: 500;
             border-bottom: 3px solid transparent;
             transition: all 0.2s;
-            margin-right: 32px;
+            margin-right: 8px;
             cursor: pointer;
             color: rgb(75, 85, 99);
+        }
+        @media (min-width: 640px) {
+            .tab {
+                padding: 10px 12px;
+                font-size: 14px;
+                margin-right: 16px;
+            }
+        }
+        @media (min-width: 768px) {
+            .tab {
+                padding: 12px 16px;
+                font-size: 16px;
+                margin-right: 24px;
+            }
+        }
+        @media (min-width: 1024px) {
+            .tab {
+                padding: 12px 24px;
+                font-size: 18px;
+                margin-right: 32px;
+            }
         }
         .tab:hover {
             color: rgb(31, 41, 55);
@@ -434,23 +648,67 @@ export default function Component() {
         }
         .content-area {
             flex: 1;
-            padding: 24px;
+            padding: 8px;
             overflow: auto;
-            padding-left: 24px;
             border: 0;
             line-height: 1.75;
             letter-spacing: normal;
         }
+        @media (min-width: 640px) {
+            .content-area {
+                padding: 12px;
+            }
+        }
+        @media (min-width: 768px) {
+            .content-area {
+                padding: 16px;
+            }
+        }
+        @media (min-width: 1024px) {
+            .content-area {
+                padding: 24px;
+            }
+        }
         .section-title {
             font-weight: 500;
             color: rgb(75, 85, 99);
-            margin-bottom: 24px;
-            font-size: 32px;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+        @media (min-width: 640px) {
+            .section-title {
+                margin-bottom: 16px;
+                font-size: 18px;
+            }
+        }
+        @media (min-width: 768px) {
+            .section-title {
+                margin-bottom: 20px;
+                font-size: 24px;
+            }
+        }
+        @media (min-width: 1024px) {
+            .section-title {
+                margin-bottom: 24px;
+                font-size: 32px;
+            }
         }
         .menu-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
+            grid-template-columns: repeat(1, 1fr);
+            gap: 8px;
+        }
+        @media (min-width: 640px) {
+            .menu-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+        }
+        @media (min-width: 1024px) {
+            .menu-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 24px;
+            }
         }
         .menu-card {
             overflow: hidden;
@@ -467,26 +725,75 @@ export default function Component() {
         }
         .menu-image {
             width: 100%;
-            height: 176px;
+            height: 96px;
             object-fit: cover;
+        }
+        @media (min-width: 640px) {
+            .menu-image {
+                height: 128px;
+            }
+        }
+        @media (min-width: 768px) {
+            .menu-image {
+                height: 144px;
+            }
+        }
+        @media (min-width: 1024px) {
+            .menu-image {
+                height: 176px;
+            }
         }
         .badge {
             position: absolute;
-            top: 12px;
-            right: 12px;
+            top: 4px;
+            right: 4px;
             background: rgb(31, 41, 55);
             color: white;
             padding: 2px 4px;
             font-size: 12px;
             border-radius: 2px;
         }
+        @media (min-width: 640px) {
+            .badge {
+                top: 8px;
+                right: 8px;
+            }
+        }
+        @media (min-width: 768px) {
+            .badge {
+                top: 12px;
+                right: 12px;
+            }
+        }
         .menu-info {
-            padding: 16px;
+            padding: 8px;
+        }
+        @media (min-width: 640px) {
+            .menu-info {
+                padding: 12px;
+            }
+        }
+        @media (min-width: 768px) {
+            .menu-info {
+                padding: 16px;
+            }
         }
         .menu-name {
             font-weight: 500;
-            font-size: 18px;
-            margin-bottom: 12px;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        @media (min-width: 640px) {
+            .menu-name {
+                font-size: 16px;
+                margin-bottom: 10px;
+            }
+        }
+        @media (min-width: 768px) {
+            .menu-name {
+                font-size: 18px;
+                margin-bottom: 12px;
+            }
         }
         .price-container {
             display: flex;
@@ -494,19 +801,46 @@ export default function Component() {
             justify-content: space-between;
         }
         .menu-price {
-            font-size: 18px;
+            font-size: 14px;
             font-weight: bold;
+        }
+        @media (min-width: 640px) {
+            .menu-price {
+                font-size: 16px;
+            }
+        }
+        @media (min-width: 768px) {
+            .menu-price {
+                font-size: 18px;
+            }
         }
         .add-button {
             background: rgb(31, 41, 55);
             color: white;
-            padding: 8px 24px;
+            padding: 4px 8px;
             font-weight: 500;
-            font-size: 14px;
+            font-size: 12px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             transition: background-color 0.2s;
+        }
+        @media (min-width: 640px) {
+            .add-button {
+                padding: 6px 12px;
+                font-size: 13px;
+            }
+        }
+        @media (min-width: 768px) {
+            .add-button {
+                padding: 6px 16px;
+                font-size: 14px;
+            }
+        }
+        @media (min-width: 1024px) {
+            .add-button {
+                padding: 8px 24px;
+            }
         }
         .add-button:hover {
             background: rgb(55, 65, 81);
@@ -516,28 +850,72 @@ export default function Component() {
         .action-bar {
             background: white;
             border-top: 1px solid rgb(229, 231, 235);
-            padding: 24px;
+            padding: 8px;
             display: flex;
             align-items: end;
             justify-content: end;
         }
+        @media (min-width: 640px) {
+            .action-bar {
+                padding: 12px;
+            }
+        }
+        @media (min-width: 768px) {
+            .action-bar {
+                padding: 16px;
+            }
+        }
+        @media (min-width: 1024px) {
+            .action-bar {
+                padding: 24px;
+            }
+        }
         .action-buttons {
             display: flex;
-            gap: 16px;
+            gap: 8px;
+        }
+        @media (min-width: 640px) {
+            .action-buttons {
+                gap: 12px;
+            }
+        }
+        @media (min-width: 768px) {
+            .action-buttons {
+                gap: 16px;
+            }
         }
         .order-history-btn {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 4px;
             background: white;
             border: 1px solid rgb(209, 213, 219);
             color: rgb(75, 85, 99);
-            padding: 12px 24px;
+            padding: 8px 8px;
             border-radius: 6px;
             cursor: pointer;
             font-weight: 500;
-            font-size: 16px;
+            font-size: 12px;
             transition: background-color 0.2s;
+        }
+        @media (min-width: 640px) {
+            .order-history-btn {
+                gap: 6px;
+                padding: 10px 12px;
+                font-size: 14px;
+            }
+        }
+        @media (min-width: 768px) {
+            .order-history-btn {
+                gap: 8px;
+                padding: 12px 16px;
+                font-size: 16px;
+            }
+        }
+        @media (min-width: 1024px) {
+            .order-history-btn {
+                padding: 12px 24px;
+            }
         }
         .order-history-btn:hover {
             background: rgb(249, 250, 251);
@@ -546,13 +924,30 @@ export default function Component() {
             background: rgb(6, 182, 212);
             color: black;
             font-weight: bold;
-            font-size: 16px;
-            padding: 12px 32px;
+            font-size: 12px;
+            padding: 8px 12px;
             border: none;
             border-radius: 6px;
             cursor: pointer;
             position: relative;
             transition: background-color 0.2s;
+        }
+        @media (min-width: 640px) {
+            .order-btn {
+                font-size: 14px;
+                padding: 10px 16px;
+            }
+        }
+        @media (min-width: 768px) {
+            .order-btn {
+                font-size: 16px;
+                padding: 12px 24px;
+            }
+        }
+        @media (min-width: 1024px) {
+            .order-btn {
+                padding: 12px 32px;
+            }
         }
         .order-btn:hover {
             background: rgb(8, 145, 178);
@@ -563,18 +958,34 @@ export default function Component() {
         }
         .cart-count {
             position: absolute;
-            top: -8px;
-            right: -8px;
+            top: -4px;
+            right: -4px;
             background: rgb(8, 145, 178);
             color: white;
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
+            width: 16px;
+            height: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 12px;
             font-weight: bold;
+        }
+        @media (min-width: 640px) {
+            .cart-count {
+                top: -6px;
+                right: -6px;
+                width: 20px;
+                height: 20px;
+            }
+        }
+        @media (min-width: 768px) {
+            .cart-count {
+                top: -8px;
+                right: -8px;
+                width: 24px;
+                height: 24px;
+            }
         }
         
         /* 모달 스타일 */
@@ -1047,62 +1458,62 @@ export default function Component() {
   }
 
   return (
-    <div className="w-full h-screen bg-gray-200 flex items-center justify-center p-[10%]">
+    <div className="w-full min-h-screen bg-gray-200 flex items-center justify-center p-2 sm:p-4 md:p-8 lg:p-[10%]">
       <div
-        className="bg-gray-800 rounded-3xl p-4 shadow-2xl px-5 py-6"
-        style={{ aspectRatio: "4/3", width: "100%", maxWidth: "1200px", height: "auto" }}
+        className="bg-gray-800 rounded-xl sm:rounded-2xl md:rounded-3xl p-2 sm:p-3 md:p-4 lg:p-6 shadow-2xl w-full max-w-xs sm:max-w-lg md:max-w-2xl lg:max-w-4xl xl:max-w-6xl"
+        style={{ aspectRatio: "4/3", height: "auto" }}
       >
         <div className="w-full h-full bg-white rounded-2xl overflow-hidden flex relative">
           {/* Map Button - 우측 상단 (매장명이 있을 때만 표시) */}
           <Button
             onClick={handleOpenMap}
-            className="absolute top-4 right-20 z-10 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full"
+            className="absolute top-2 sm:top-3 md:top-4 right-11 sm:right-14 md:right-16 lg:right-20 z-10 bg-blue-600 hover:bg-blue-700 text-white p-1 sm:p-1.5 md:p-2 rounded-full"
             size="sm"
             title="네이버 지도에서 검색"
           >
-            <MapPin className="w-4 h-4" />
+            <MapPin className="w-3 sm:w-3.5 md:w-4 h-3 sm:h-3.5 md:h-4" />
           </Button>
 
           {/* Download Button - 우측 상단 */}
           <Button
             onClick={handleDownloadHTML}
-            className="absolute top-4 right-12 z-10 bg-green-600 hover:bg-green-700 text-white p-2 rounded-full"
+            className="absolute top-2 sm:top-3 md:top-4 right-6 sm:right-8 md:right-9 lg:right-12 z-10 bg-green-600 hover:bg-green-700 text-white p-1 sm:p-1.5 md:p-2 rounded-full"
             size="sm"
             title="HTML 파일 다운로드"
           >
-            <Download className="w-4 h-4" />
+            <Download className="w-3 sm:w-3.5 md:w-4 h-3 sm:h-3.5 md:h-4" />
           </Button>
 
           {/* Settings Button - 우측 상단 */}
           <Button
             onClick={handleStoreSettingsOpen}
-            className="absolute top-4 right-4 z-10 bg-gray-600 hover:bg-gray-700 text-white p-2 rounded-full"
+            className="absolute top-2 sm:top-3 md:top-4 right-2 sm:right-3 md:right-4 z-10 bg-gray-600 hover:bg-gray-700 text-white p-1 sm:p-1.5 md:p-2 rounded-full"
             size="sm"
           >
-            <Settings className="w-4 h-4" />
+            <Settings className="w-3 sm:w-3.5 md:w-4 h-3 sm:h-3.5 md:h-4" />
           </Button>
 
           {/* Left Sidebar */}
-          <div className="w-36 bg-gray-800 text-white flex flex-col relative">
-            <div className="p-4 text-center bg-[rgba(34,34,34,1)]">
-              <div className="bg-white text-black rounded-xl font-bold leading-tight text-3xl text-center tracking-wide py-4 mb-4 mt-4 leading-8 px-4 ml-px mr-0.5">
+          <div className="w-20 sm:w-24 md:w-32 lg:w-36 bg-gray-800 text-white flex flex-col relative">
+            <div className="p-2 sm:p-3 md:p-4 text-center bg-[rgba(34,34,34,1)]">
+              <div className="bg-white text-black rounded-lg sm:rounded-xl font-bold leading-tight text-sm sm:text-lg md:text-2xl lg:text-3xl text-center tracking-wide py-2 sm:py-3 md:py-4 mb-2 sm:mb-3 md:mb-4 mt-2 sm:mt-3 md:mt-4 leading-4 sm:leading-6 md:leading-8 px-2 sm:px-3 md:px-4 ml-px mr-0.5">
                 하이
                 <br />
                 오더
               </div>
-              <div className="text-white font-bold mb-6 text-2xl whitespace-pre-wrap text-center leading-tight">{storeName}</div>
+              <div className="text-white font-bold mb-3 sm:mb-4 md:mb-6 text-xs sm:text-sm md:text-lg lg:text-2xl whitespace-pre-wrap text-center leading-tight">{storeName}</div>
             </div>
 
             <div className="flex-1 px-0 mx-0 tracking-normal leading-7 border-0 bg-[rgba(34,34,34,1)]">
-              <div className="flex items-center px-4 py-3 border-l-4 border-cyan-400 mx-2 rounded-r bg-[rgba(61,61,61,1)]">
-                <img src="https://cdn-icons-png.flaticon.com/256/192/192732.png" className="mr-2 w-6 h-6 brightness-0 invert" alt="메뉴주문" />
-                <span className="text-base tracking-normal font-extrabold leading-10">메뉴주문</span>
+              <div className="flex items-center px-2 sm:px-3 md:px-4 py-2 sm:py-3 border-l-4 border-cyan-400 mx-1 sm:mx-2 rounded-r bg-[rgba(61,61,61,1)]">
+                <img src="https://cdn-icons-png.flaticon.com/256/192/192732.png" className="mr-1 sm:mr-2 w-3 sm:w-4 md:w-5 lg:w-6 h-3 sm:h-4 md:h-5 lg:h-6 brightness-0 invert" alt="메뉴주문" />
+                <span className="text-xs sm:text-sm md:text-base tracking-normal font-extrabold leading-6 sm:leading-8 md:leading-10" style={{ whiteSpace: 'nowrap' }}>메뉴주문</span>
               </div>
             </div>
 
             {/* Circular Call Staff Button - positioned absolutely */}
-            <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2">
-              <Button className="bg-cyan-400 hover:bg-cyan-500 font-bold rounded-full shadow-lg text-white text-xl leading-7 tracking-normal h-24 w-24">
+            <div className="absolute bottom-3 sm:bottom-4 md:bottom-6 left-1/2 transform -translate-x-1/2">
+              <Button className="bg-cyan-400 hover:bg-cyan-500 font-bold rounded-full shadow-lg text-white text-xs sm:text-sm md:text-lg lg:text-xl leading-3 sm:leading-5 md:leading-7 tracking-normal h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 lg:h-24 lg:w-24">
                 직원
                 <br />
                 호출
@@ -1114,12 +1525,12 @@ export default function Component() {
           <div className="flex-1 flex flex-col">
             {/* Header Tabs */}
             <div className="bg-white border-b border-gray-200">
-              <div className="flex px-6 pt-4">
+              <div className="flex px-2 sm:px-3 md:px-4 lg:px-6 pt-2 sm:pt-3 md:pt-4">
                 {tabs.map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`px-6 py-3 text-lg font-medium border-b-3 transition-colors mr-8 ${
+                    className={`px-2 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base lg:text-lg font-medium border-b-3 transition-colors mr-2 sm:mr-4 md:mr-6 lg:mr-8 ${
                       activeTab === tab
                         ? "text-cyan-500 border-cyan-500"
                         : "text-gray-600 border-transparent hover:text-gray-800"
@@ -1132,53 +1543,53 @@ export default function Component() {
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 p-6 overflow-auto px-6 border-0 leading-7 tracking-normal">
-              <h2 className="font-medium text-gray-600 mb-6 text-2xl">{activeTab}</h2>
+            <div className="flex-1 p-2 sm:p-3 md:p-4 lg:p-6 overflow-auto border-0 leading-7 tracking-normal">
+              <h2 className="font-medium text-gray-600 mb-3 sm:mb-4 md:mb-6 text-sm sm:text-lg md:text-xl lg:text-2xl">{activeTab}</h2>
 
-              <div className="grid grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4 lg:gap-6">
                 {filteredFoodItems.map((item) => (
-                  <Card key={item.id} className="overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-                    <div className="relative">
-                      <Image
-                        src={item.image || "/placeholder.svg"}
-                        alt={item.name}
-                        width={280}
-                        height={180}
-                        className="w-full h-44 object-cover"
-                      />
-                      {item.badge && (
-                        <Badge className="absolute top-3 right-3 bg-gray-800 text-white px-2 py-1 text-xs">
-                          {item.badge}
-                        </Badge>
-                      )}
-                    </div>
-                    <CardContent className="p-4">
-                      <h3 className="font-medium text-lg mb-3">{item.name}</h3>
-                      <div className="flex items-center justify-between">
-                        <span className="text-lg font-bold">{item.price}</span>
-                        <Button
-                          onClick={() => handleAddToCart(item)}
-                          className="bg-gray-800 hover:bg-gray-700 text-white px-6 py-2 font-medium"
-                        >
-                          담기
-                        </Button>
+                                      <Card key={item.id} className="overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+                      <div className="relative">
+                        <Image
+                          src={item.image || "/placeholder.svg"}
+                          alt={item.name}
+                          width={280}
+                          height={180}
+                          className="w-full h-24 sm:h-32 md:h-36 lg:h-44 object-cover"
+                        />
+                        {item.badge && (
+                          <Badge className="absolute top-1 sm:top-2 md:top-3 right-1 sm:right-2 md:right-3 bg-gray-800 text-white px-1 sm:px-2 py-0.5 sm:py-1 text-xs">
+                            {item.badge}
+                          </Badge>
+                        )}
                       </div>
-                    </CardContent>
-                  </Card>
+                      <CardContent className="p-2 sm:p-3 md:p-4">
+                        <h3 className="font-medium text-sm sm:text-base md:text-lg mb-2 sm:mb-3">{item.name}</h3>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm sm:text-base md:text-lg font-bold">{item.price}</span>
+                          <Button
+                            onClick={() => handleAddToCart(item)}
+                            className="bg-gray-800 hover:bg-gray-700 text-white px-2 sm:px-3 md:px-4 lg:px-6 py-1 sm:py-1.5 md:py-2 font-medium text-xs sm:text-sm md:text-base"
+                          >
+                            담기
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
                 ))}
               </div>
             </div>
 
             {/* Bottom Action Bar */}
-            <div className="bg-white border-t border-gray-200 p-6 flex items-end justify-end">
-              <div className="flex gap-4">
+            <div className="bg-white border-t border-gray-200 p-2 sm:p-3 md:p-4 lg:p-6 flex items-end justify-end">
+              <div className="flex gap-2 sm:gap-3 md:gap-4">
                 <Dialog open={showOrderHistory} onOpenChange={setShowOrderHistory}>
                   <DialogTrigger asChild>
                     <Button
                       variant="outline"
-                      className="flex items-center gap-2 bg-white border-gray-300 text-gray-600 hover:bg-gray-50 px-6 py-3"
+                      className="flex items-center gap-1 sm:gap-2 bg-white border-gray-300 text-gray-600 hover:bg-gray-50 px-2 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base"
                     >
-                      <Menu className="w-4 h-4" />
+                      <Menu className="w-3 sm:w-4 h-3 sm:h-4" />
                       주문내역
                     </Button>
                   </DialogTrigger>
@@ -1225,11 +1636,11 @@ export default function Component() {
                 <AlertDialog open={showOrderConfirm} onOpenChange={setShowOrderConfirm}>
                   <AlertDialogTrigger asChild>
                     <Button 
-                      className="bg-cyan-400 hover:bg-cyan-500 text-black font-bold px-8 py-3 relative"
+                      className="bg-cyan-400 hover:bg-cyan-500 text-black font-bold px-3 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-2.5 md:py-3 relative text-xs sm:text-sm md:text-base"
                       disabled={orderItems.length === 0}
                     >
                       주문하기
-                      <Badge className="absolute -top-2 -right-2 bg-cyan-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
+                      <Badge className="absolute -top-1 sm:-top-2 -right-1 sm:-right-2 bg-cyan-600 text-white rounded-full w-4 sm:w-5 md:w-6 h-4 sm:h-5 md:h-6 flex items-center justify-center text-xs font-bold">
                         {getCartCount()}
                       </Badge>
                     </Button>
