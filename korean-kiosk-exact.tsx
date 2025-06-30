@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { ConciergeBellIcon, Menu, X, Settings, Plus, Edit, Trash2, MapPin, Download } from "lucide-react"
 import Image from "next/image"
+import { supabase, MenuBoard } from "@/lib/supabase"
 
 // 주문 아이템 타입 정의
 interface OrderItem {
@@ -67,17 +68,50 @@ export default function Component() {
   const [tempMenuImage, setTempMenuImage] = useState("")
   const [tempMenuCategory, setTempMenuCategory] = useState("")
   const [isMobile, setIsMobile] = useState(false)
+  const [isTablet, setIsTablet] = useState(false)
+  
+  // 저장/불러오기 관련 상태
+  const [savedMenuBoards, setSavedMenuBoards] = useState<any[]>([])
+  const [searchQuery, setSearchQuery] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
+    const checkDeviceType = () => {
+      const width = window.innerWidth
+      const height = window.innerHeight
+      setIsMobile(width < 768)
+      setIsTablet(width >= 768 && width <= 1024)
     }
     
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
+    checkDeviceType()
+    window.addEventListener('resize', checkDeviceType)
     
-    return () => window.removeEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkDeviceType)
   }, [])
+
+  // 저장된 메뉴판 목록 로드
+  useEffect(() => {
+    loadSavedMenuBoards()
+  }, [])
+
+  const loadSavedMenuBoards = async () => {
+    setIsLoading(true)
+    try {
+      // Supabase에서 로드
+      const { data, error } = await supabase
+        .from('menu_boards')
+        .select('*')
+        .order('created_at', { ascending: false })
+      
+      if (error) throw error
+      setSavedMenuBoards(data || [])
+    } catch (error) {
+      console.error('저장된 메뉴판 로드 실패:', error)
+      alert('메뉴판 로드에 실패했습니다: ' + (error as Error).message)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   // 현재 선택된 탭에 해당하는 메뉴만 필터링
   const filteredFoodItems = foodItems.filter(item => item.category === activeTab)
@@ -274,6 +308,114 @@ export default function Component() {
   }
 
   // HTML 다운로드 함수
+  // 현재 상태 저장
+  const handleSaveCurrentState = async () => {
+    setIsLoading(true)
+    try {
+      const boardName = `${storeName} ${storeAddress}`.trim() || '이름없는 메뉴판'
+      
+      // Supabase에 저장
+      const menuBoard: MenuBoard = {
+        name: boardName,
+        store_name: storeName,
+        store_address: storeAddress,
+        tabs,
+        food_items: foodItems
+      }
+      
+      // 같은 이름이 있는지 확인
+      const { data: existing } = await supabase
+        .from('menu_boards')
+        .select('id')
+        .eq('name', boardName)
+        .single()
+      
+      if (existing) {
+        // 업데이트
+        const { error } = await supabase
+          .from('menu_boards')
+          .update(menuBoard)
+          .eq('id', existing.id)
+        
+        if (error) throw error
+      } else {
+        // 새로 추가
+        const { error } = await supabase
+          .from('menu_boards')
+          .insert([menuBoard])
+        
+        if (error) throw error
+      }
+      
+      await loadSavedMenuBoards()
+      alert('메뉴판이 저장되었습니다!')
+    } catch (error) {
+      console.error('저장 실패:', error)
+      alert('저장에 실패했습니다: ' + (error as Error).message)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // 저장된 메뉴판 불러오기
+  const handleLoadMenuBoard = (boardData: any) => {
+    try {
+      // 클라우드 데이터와 로컬 데이터 모두 지원
+      const storeName = boardData.store_name || boardData.storeName || '식당명'
+      const storeAddress = boardData.store_address || boardData.storeAddress || ''
+      const tabs = boardData.tabs || ['메인메뉴']
+      const foodItems = boardData.food_items || boardData.foodItems || []
+      
+      setStoreName(storeName)
+      setStoreAddress(storeAddress)
+      setTabs(tabs)
+      setFoodItems(foodItems)
+      setActiveTab(tabs[0] || '메인메뉴')
+      
+      // 임시 상태도 업데이트
+      setTempStoreName(storeName)
+      setTempStoreAddress(storeAddress)
+      
+      setShowStoreSettings(false)
+      alert('메뉴판을 불러왔습니다!')
+    } catch (error) {
+      console.error('불러오기 실패:', error)
+      alert('불러오기에 실패했습니다: ' + (error as Error).message)
+    }
+  }
+
+  // 저장된 메뉴판 삭제
+  const handleDeleteMenuBoard = async (boardId: number) => {
+    setIsLoading(true)
+    try {
+      // Supabase에서 삭제
+      const { error } = await supabase
+        .from('menu_boards')
+        .delete()
+        .eq('id', boardId)
+      
+      if (error) throw error
+      await loadSavedMenuBoards()
+      alert('메뉴판이 삭제되었습니다.')
+    } catch (error) {
+      console.error('삭제 실패:', error)
+      alert('삭제에 실패했습니다: ' + (error as Error).message)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // 검색 필터링된 메뉴판 목록
+  const filteredSavedBoards = savedMenuBoards.filter(board => {
+    const name = board.name || ''
+    const storeName = board.store_name || board.storeName || ''
+    const storeAddress = board.store_address || board.storeAddress || ''
+    
+    return name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+           storeName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+           storeAddress.toLowerCase().includes(searchQuery.toLowerCase())
+  })
+
   const handleDownloadHTML = () => {
     const currentDate = new Date().toISOString().split('T')[0]
     
@@ -1465,39 +1607,39 @@ export default function Component() {
       <div
         className="bg-gray-800 rounded-lg sm:rounded-2xl md:rounded-3xl p-1 sm:p-3 md:p-4 lg:p-6 shadow-2xl"
         style={{ 
-          aspectRatio: isMobile ? "9/16" : "4/3", 
-          width: isMobile ? "98vw" : "100%",
-          height: isMobile ? "98vh" : "auto",
-          maxWidth: isMobile ? "none" : "min(90vw, 90vh * 4/3)",
-          maxHeight: isMobile ? "none" : "90vh"
+          aspectRatio: isMobile ? "9/16" : isTablet ? "16/10" : "4/3", 
+          width: isMobile ? "98vw" : isTablet ? "95vw" : "100%",
+          height: isMobile ? "98vh" : isTablet ? "85vh" : "auto",
+          maxWidth: isMobile ? "none" : isTablet ? "none" : "min(90vw, 90vh * 4/3)",
+          maxHeight: isMobile ? "none" : isTablet ? "85vh" : "90vh"
         }}
       >
         <div className="w-full h-full bg-white rounded-2xl overflow-hidden flex relative">
-          {/* Mobile: 하단에 배치, Desktop: 상단에 배치 */}
-          {isMobile ? (
+          {/* Mobile/Tablet: 하단에 배치, Desktop: 상단에 배치 */}
+          {isMobile || isTablet ? (
             <div className="absolute bottom-2 right-2 z-10 flex gap-1">
               <Button
                 onClick={handleOpenMap}
-                className="bg-blue-600 hover:bg-blue-700 text-white p-1 rounded-full"
+                className={`bg-blue-600 hover:bg-blue-700 text-white rounded-full ${isTablet ? 'p-2' : 'p-1'}`}
                 size="sm"
                 title="네이버 지도에서 검색"
               >
-                <MapPin className="w-3 h-3" />
+                <MapPin className={`${isTablet ? 'w-4 h-4' : 'w-3 h-3'}`} />
               </Button>
               <Button
                 onClick={handleDownloadHTML}
-                className="bg-green-600 hover:bg-green-700 text-white p-1 rounded-full"
+                className={`bg-green-600 hover:bg-green-700 text-white rounded-full ${isTablet ? 'p-2' : 'p-1'}`}
                 size="sm"
                 title="HTML 파일 다운로드"
               >
-                <Download className="w-3 h-3" />
+                <Download className={`${isTablet ? 'w-4 h-4' : 'w-3 h-3'}`} />
               </Button>
               <Button
                 onClick={handleStoreSettingsOpen}
-                className="bg-gray-600 hover:bg-gray-700 text-white p-1 rounded-full"
+                className={`bg-gray-600 hover:bg-gray-700 text-white rounded-full ${isTablet ? 'p-2' : 'p-1'}`}
                 size="sm"
               >
-                <Settings className="w-3 h-3" />
+                <Settings className={`${isTablet ? 'w-4 h-4' : 'w-3 h-3'}`} />
               </Button>
             </div>
           ) : (
@@ -1536,7 +1678,7 @@ export default function Component() {
           )}
 
           {/* Left Sidebar */}
-          <div className={`${isMobile ? 'w-24' : 'w-20 sm:w-24 md:w-32 lg:w-36'} bg-gray-800 text-white flex flex-col relative`}>
+          <div className={`${isMobile ? 'w-24' : isTablet ? 'w-28' : 'w-20 sm:w-24 md:w-32 lg:w-36'} bg-gray-800 text-white flex flex-col relative`}>
             <div className="p-2 sm:p-3 md:p-4 text-center bg-[rgba(34,34,34,1)]">
               <div className="bg-white text-black rounded-lg sm:rounded-xl font-bold leading-tight text-sm sm:text-lg md:text-2xl lg:text-3xl text-center tracking-wide py-2 sm:py-3 md:py-4 mb-2 sm:mb-3 md:mb-4 mt-2 sm:mt-3 md:mt-4 leading-4 sm:leading-6 md:leading-8 px-2 sm:px-3 md:px-4 ml-px mr-0.5">
                 하이
@@ -1547,17 +1689,17 @@ export default function Component() {
             </div>
 
             <div className="flex-1 px-0 mx-0 tracking-normal leading-7 border-0 bg-[rgba(34,34,34,1)] flex flex-col">
-              <div className={`flex items-center ${isMobile ? 'px-1 py-1.5 mx-0.5' : 'px-2 sm:px-3 md:px-4 py-2 sm:py-3 mx-1 sm:mx-2'} border-l-4 border-cyan-400 rounded-r bg-[rgba(61,61,61,1)]`}>
-                <img src="https://cdn-icons-png.flaticon.com/256/192/192732.png" className={`${isMobile ? 'mr-1 w-3 h-3' : 'mr-1 sm:mr-2 w-3 sm:w-4 md:w-5 lg:w-6 h-3 sm:h-4 md:h-5 lg:h-6'} brightness-0 invert`} alt="메뉴주문" />
-                <span className={`${isMobile ? 'text-xs' : 'text-xs sm:text-sm md:text-base'} tracking-normal font-extrabold leading-6 sm:leading-8 md:leading-10`} style={{ whiteSpace: 'nowrap' }}>메뉴주문</span>
+              <div className={`flex items-center ${isMobile ? 'px-1 py-1.5 mx-0.5' : isTablet ? 'px-2 py-2 mx-1' : 'px-2 sm:px-3 md:px-4 py-2 sm:py-3 mx-1 sm:mx-2'} border-l-4 border-cyan-400 rounded-r bg-[rgba(61,61,61,1)]`}>
+                <img src="https://cdn-icons-png.flaticon.com/256/192/192732.png" className={`${isMobile ? 'mr-1 w-3 h-3' : isTablet ? 'mr-1.5 w-4 h-4' : 'mr-1 sm:mr-2 w-3 sm:w-4 md:w-5 lg:w-6 h-3 sm:h-4 md:h-5 lg:h-6'} brightness-0 invert`} alt="메뉴주문" />
+                <span className={`${isMobile ? 'text-xs' : isTablet ? 'text-sm' : 'text-xs sm:text-sm md:text-base'} tracking-normal font-extrabold leading-6 sm:leading-8 md:leading-10`} style={{ whiteSpace: 'nowrap' }}>메뉴주문</span>
               </div>
               
               {/* Spacer to push button to bottom */}
               <div className="flex-1"></div>
               
               {/* Circular Call Staff Button */}
-              <div className={`${isMobile ? 'pb-2' : 'pb-3 sm:pb-4 md:pb-6'} flex justify-center`}>
-                <Button className={`bg-cyan-400 hover:bg-cyan-500 font-bold rounded-full shadow-lg text-white tracking-normal ${isMobile ? 'text-xs leading-3 h-10 w-10' : 'text-xs sm:text-sm md:text-lg lg:text-xl leading-3 sm:leading-5 md:leading-7 h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 lg:h-24 lg:w-24'}`}>
+              <div className={`${isMobile ? 'pb-2' : isTablet ? 'pb-3' : 'pb-3 sm:pb-4 md:pb-6'} flex justify-center`}>
+                <Button className={`bg-cyan-400 hover:bg-cyan-500 font-bold rounded-full shadow-lg text-white tracking-normal ${isMobile ? 'text-xs leading-3 h-10 w-10' : isTablet ? 'text-sm leading-4 h-14 w-14' : 'text-xs sm:text-sm md:text-lg lg:text-xl leading-3 sm:leading-5 md:leading-7 h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 lg:h-24 lg:w-24'}`}>
                   직원
                   <br />
                   호출
@@ -1575,7 +1717,7 @@ export default function Component() {
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`${isMobile ? 'px-2 py-1.5 text-xs mr-1' : 'px-2 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base lg:text-lg mr-2 sm:mr-4 md:mr-6 lg:mr-8'} font-medium border-b-3 transition-colors ${
+                    className={`${isMobile ? 'px-2 py-1.5 text-xs mr-1' : isTablet ? 'px-3 py-2 text-sm mr-1.5' : 'px-2 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base lg:text-lg mr-2 sm:mr-4 md:mr-6 lg:mr-8'} font-medium border-b-3 transition-colors ${
                       activeTab === tab
                         ? "text-cyan-500 border-cyan-500"
                         : "text-gray-600 border-transparent hover:text-gray-800"
@@ -1588,10 +1730,10 @@ export default function Component() {
             </div>
 
             {/* Content Area */}
-            <div className={`flex-1 ${isMobile ? 'p-1' : 'p-2 sm:p-3 md:p-4 lg:p-6'} overflow-auto border-0 leading-7 tracking-normal`}>
-              <h2 className={`font-medium text-gray-600 ${isMobile ? 'mb-2 text-sm' : 'mb-3 sm:mb-4 md:mb-6 text-sm sm:text-lg md:text-xl lg:text-2xl'}`}>{activeTab}</h2>
+            <div className={`flex-1 ${isMobile ? 'p-1' : isTablet ? 'p-2' : 'p-2 sm:p-3 md:p-4 lg:p-6'} overflow-auto border-0 leading-7 tracking-normal`}>
+              <h2 className={`font-medium text-gray-600 ${isMobile ? 'mb-2 text-sm' : isTablet ? 'mb-2 text-base' : 'mb-3 sm:mb-4 md:mb-6 text-sm sm:text-lg md:text-xl lg:text-2xl'}`}>{activeTab}</h2>
 
-              <div className={`grid gap-2 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4 lg:gap-6'}`}>
+              <div className={`grid gap-2 ${isMobile ? 'grid-cols-1' : isTablet ? 'grid-cols-2 gap-3' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4 lg:gap-6'}`}>
                 {filteredFoodItems.map((item) => (
                                       <Card key={item.id} className="overflow-hidden shadow-md hover:shadow-lg transition-shadow">
                       <div className="relative">
@@ -1600,7 +1742,7 @@ export default function Component() {
                           alt={item.name}
                           width={280}
                           height={180}
-                          className="w-full h-24 sm:h-32 md:h-36 lg:h-44 object-cover"
+                          className={`w-full object-cover ${isMobile ? 'h-24' : isTablet ? 'h-28' : 'h-24 sm:h-32 md:h-36 lg:h-44'}`}
                         />
                         {item.badge && (
                           <Badge className="absolute top-1 sm:top-2 md:top-3 right-1 sm:right-2 md:right-3 bg-gray-800 text-white px-1 sm:px-2 py-0.5 sm:py-1 text-xs">
@@ -1608,13 +1750,13 @@ export default function Component() {
                           </Badge>
                         )}
                       </div>
-                      <CardContent className="p-2 sm:p-3 md:p-4">
-                        <h3 className="font-medium text-sm sm:text-base md:text-lg mb-2 sm:mb-3">{item.name}</h3>
+                      <CardContent className={`${isMobile ? 'p-2' : isTablet ? 'p-3' : 'p-2 sm:p-3 md:p-4'}`}>
+                        <h3 className={`font-medium mb-2 ${isMobile ? 'text-sm' : isTablet ? 'text-base' : 'text-sm sm:text-base md:text-lg mb-2 sm:mb-3'}`}>{item.name}</h3>
                         <div className="flex items-center justify-between">
-                          <span className="text-sm sm:text-base md:text-lg font-bold">{item.price}</span>
+                          <span className={`font-bold ${isMobile ? 'text-sm' : isTablet ? 'text-base' : 'text-sm sm:text-base md:text-lg'}`}>{item.price}</span>
                           <Button
                             onClick={() => handleAddToCart(item)}
-                            className="bg-gray-800 hover:bg-gray-700 text-white px-2 sm:px-3 md:px-4 lg:px-6 py-1 sm:py-1.5 md:py-2 font-medium text-xs sm:text-sm md:text-base"
+                            className={`bg-gray-800 hover:bg-gray-700 text-white font-medium ${isMobile ? 'px-2 py-1 text-xs' : isTablet ? 'px-3 py-1.5 text-sm' : 'px-2 sm:px-3 md:px-4 lg:px-6 py-1 sm:py-1.5 md:py-2 text-xs sm:text-sm md:text-base'}`}
                           >
                             담기
                           </Button>
@@ -1626,15 +1768,15 @@ export default function Component() {
             </div>
 
             {/* Bottom Action Bar */}
-            <div className={`bg-white border-t border-gray-200 ${isMobile ? 'p-1 pb-12' : 'p-2 sm:p-3 md:p-4 lg:p-6'} flex items-end justify-end`}>
-              <div className={`flex ${isMobile ? 'gap-1' : 'gap-2 sm:gap-3 md:gap-4'}`}>
+            <div className={`bg-white border-t border-gray-200 ${isMobile ? 'p-1 pb-12' : isTablet ? 'p-2 pb-16' : 'p-2 sm:p-3 md:p-4 lg:p-6'} flex items-end justify-end`}>
+              <div className={`flex ${isMobile ? 'gap-1' : isTablet ? 'gap-2' : 'gap-2 sm:gap-3 md:gap-4'}`}>
                 <Dialog open={showOrderHistory} onOpenChange={setShowOrderHistory}>
                   <DialogTrigger asChild>
                     <Button
                       variant="outline"
-                      className={`flex items-center gap-1 sm:gap-2 bg-white border-gray-300 text-gray-600 hover:bg-gray-50 ${isMobile ? 'px-2 py-1.5 text-xs' : 'px-2 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base'}`}
+                      className={`flex items-center gap-1 sm:gap-2 bg-white border-gray-300 text-gray-600 hover:bg-gray-50 ${isMobile ? 'px-2 py-1.5 text-xs' : isTablet ? 'px-3 py-2 text-sm' : 'px-2 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base'}`}
                     >
-                      <Menu className={`${isMobile ? 'w-3 h-3' : 'w-3 sm:w-4 h-3 sm:h-4'}`} />
+                      <Menu className={`${isMobile ? 'w-3 h-3' : isTablet ? 'w-4 h-4' : 'w-3 sm:w-4 h-3 sm:h-4'}`} />
                       주문내역
                     </Button>
                   </DialogTrigger>
@@ -1681,11 +1823,11 @@ export default function Component() {
                 <AlertDialog open={showOrderConfirm} onOpenChange={setShowOrderConfirm}>
                   <AlertDialogTrigger asChild>
                     <Button 
-                      className={`bg-cyan-400 hover:bg-cyan-500 text-black font-bold relative ${isMobile ? 'px-3 py-1.5 text-xs' : 'px-3 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base'}`}
+                      className={`bg-cyan-400 hover:bg-cyan-500 text-black font-bold relative ${isMobile ? 'px-3 py-1.5 text-xs' : isTablet ? 'px-4 py-2 text-sm' : 'px-3 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base'}`}
                       disabled={orderItems.length === 0}
                     >
                       주문하기
-                      <Badge className={`absolute -top-1 sm:-top-2 -right-1 sm:-right-2 bg-cyan-600 text-white rounded-full flex items-center justify-center text-xs font-bold ${isMobile ? 'w-4 h-4' : 'w-4 sm:w-5 md:w-6 h-4 sm:h-5 md:h-6'}`}>
+                      <Badge className={`absolute -top-1 sm:-top-2 -right-1 sm:-right-2 bg-cyan-600 text-white rounded-full flex items-center justify-center text-xs font-bold ${isMobile ? 'w-4 h-4' : isTablet ? 'w-5 h-5' : 'w-4 sm:w-5 md:w-6 h-4 sm:h-5 md:h-6'}`}>
                         {getCartCount()}
                       </Badge>
                     </Button>
@@ -1730,10 +1872,11 @@ export default function Component() {
                 <DialogTitle className="text-xl font-bold">설정</DialogTitle>
               </DialogHeader>
               <Tabs defaultValue="store" className="mt-4">
-                <TabsList className="grid w-full grid-cols-3">
+                <TabsList className="grid w-full grid-cols-4">
                   <TabsTrigger value="store">매장 설정</TabsTrigger>
                   <TabsTrigger value="tabs">탭 관리</TabsTrigger>
                   <TabsTrigger value="menu">메뉴 관리</TabsTrigger>
+                  <TabsTrigger value="load">불러오기</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="store" className="space-y-4 mt-4">
@@ -1762,19 +1905,35 @@ export default function Component() {
                       className="w-full"
                     />
                   </div>
-                  <div className="flex gap-2 pt-4">
+                  <div className="flex flex-col gap-2 pt-4">
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={handleStoreSettingsCancel}
+                        className="flex-1"
+                      >
+                        취소
+                      </Button>
+                      <Button
+                        onClick={handleStoreSettingsSave}
+                        className="flex-1 bg-cyan-400 hover:bg-cyan-500 text-black"
+                      >
+                        저장
+                      </Button>
+                    </div>
                     <Button
-                      variant="outline"
-                      onClick={handleStoreSettingsCancel}
-                      className="flex-1"
+                      onClick={handleSaveCurrentState}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-2"
+                      disabled={isLoading}
                     >
-                      취소
-                    </Button>
-                    <Button
-                      onClick={handleStoreSettingsSave}
-                      className="flex-1 bg-cyan-400 hover:bg-cyan-500 text-black"
-                    >
-                      저장
+                      {isLoading ? (
+                        <>
+                          <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                          저장 중...
+                        </>
+                      ) : (
+                        "현재 상태를 메뉴판으로 저장"
+                      )}
                     </Button>
                   </div>
                 </TabsContent>
@@ -1868,6 +2027,87 @@ export default function Component() {
                         </CardContent>
                       </Card>
                     ))}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="load" className="space-y-4 mt-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-medium">저장된 메뉴판 불러오기</h3>
+                    <div className="text-sm text-gray-600">
+                      총 {savedMenuBoards.length}개
+                    </div>
+                  </div>
+                  
+                  {/* 로딩 상태 */}
+                  {isLoading && (
+                    <div className="text-center py-4 text-gray-500">
+                      <div className="animate-spin w-6 h-6 border-2 border-cyan-400 border-t-transparent rounded-full mx-auto mb-2"></div>
+                      불러오는 중...
+                    </div>
+                  )}
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="searchQuery" className="text-sm font-medium">
+                      검색
+                    </Label>
+                    <Input
+                      id="searchQuery"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="매장명, 주소로 검색..."
+                      className="w-full"
+                    />
+                  </div>
+
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {filteredSavedBoards.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        {savedMenuBoards.length === 0 
+                          ? "저장된 메뉴판이 없습니다."
+                          : "검색 결과가 없습니다."
+                        }
+                      </div>
+                    ) : (
+                      filteredSavedBoards.map((board) => (
+                        <Card key={board.id} className="p-4">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <h4 className="font-medium text-lg mb-1">{board.name}</h4>
+                              <div className="text-sm text-gray-600 space-y-1">
+                                <div>매장명: {board.store_name || board.storeName}</div>
+                                {(board.store_address || board.storeAddress) && 
+                                  <div>주소: {board.store_address || board.storeAddress}</div>
+                                }
+                                <div>탭: {board.tabs?.join(', ')}</div>
+                                <div>메뉴: {(board.food_items || board.foodItems)?.length || 0}개</div>
+                                <div>저장일: {new Date(board.created_at || board.savedAt).toLocaleString('ko-KR')}</div>
+                              </div>
+                            </div>
+                            <div className="flex flex-col gap-2 ml-4">
+                              <Button
+                                onClick={() => handleLoadMenuBoard(board)}
+                                className="bg-green-600 hover:bg-green-700 text-white"
+                                size="sm"
+                              >
+                                불러오기
+                              </Button>
+                              <Button
+                                onClick={() => {
+                                  if (confirm('정말 삭제하시겠습니까?')) {
+                                    handleDeleteMenuBoard(board.id)
+                                  }
+                                }}
+                                variant="outline"
+                                size="sm"
+                                className="text-red-600 hover:bg-red-50"
+                              >
+                                삭제
+                              </Button>
+                            </div>
+                          </div>
+                        </Card>
+                      ))
+                    )}
                   </div>
                 </TabsContent>
               </Tabs>
