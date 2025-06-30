@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -66,6 +66,18 @@ export default function Component() {
   const [tempMenuPrice, setTempMenuPrice] = useState("")
   const [tempMenuImage, setTempMenuImage] = useState("")
   const [tempMenuCategory, setTempMenuCategory] = useState("")
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // 현재 선택된 탭에 해당하는 메뉴만 필터링
   const filteredFoodItems = foodItems.filter(item => item.category === activeTab)
@@ -277,11 +289,12 @@ export default function Component() {
             font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
             background: rgb(229, 231, 235);
             width: 100vw;
-            min-height: 100vh;
+            height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 8px;
+            overflow: hidden;
         }
         @media (min-width: 640px) {
             body { padding: 16px; }
@@ -295,37 +308,27 @@ export default function Component() {
         .kiosk-container {
             background: rgb(31, 41, 55);
             border-radius: 12px;
-            padding: 8px 12px;
+            padding: 4px 8px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            aspect-ratio: 4/3;
-            width: 100%;
-            max-width: 320px;
-            height: auto;
-        }
-        @media (min-width: 640px) {
-            .kiosk-container {
-                border-radius: 16px;
-                padding: 12px 16px;
-                max-width: 512px;
-            }
+            aspect-ratio: 9/16;
+            width: 98vw;
+            height: 98vh;
         }
         @media (min-width: 768px) {
             .kiosk-container {
                 border-radius: 20px;
                 padding: 16px 20px;
-                max-width: 672px;
+                aspect-ratio: 4/3;
+                width: 100%;
+                height: auto;
+                max-width: min(90vw, 90vh * 4/3);
+                max-height: 90vh;
             }
         }
         @media (min-width: 1024px) {
             .kiosk-container {
                 border-radius: 24px;
                 padding: 16px 20px;
-                max-width: 896px;
-            }
-        }
-        @media (min-width: 1280px) {
-            .kiosk-container {
-                max-width: 1152px;
             }
         }
         .kiosk-content {
@@ -1458,43 +1461,82 @@ export default function Component() {
   }
 
   return (
-    <div className="w-full min-h-screen bg-gray-200 flex items-center justify-center p-2 sm:p-4 md:p-8 lg:p-[10%]">
+    <div className="w-full h-screen bg-gray-200 flex items-center justify-center p-1 sm:p-4 md:p-8 lg:p-[10%] overflow-hidden">
       <div
-        className="bg-gray-800 rounded-xl sm:rounded-2xl md:rounded-3xl p-2 sm:p-3 md:p-4 lg:p-6 shadow-2xl w-full max-w-xs sm:max-w-lg md:max-w-2xl lg:max-w-4xl xl:max-w-6xl"
-        style={{ aspectRatio: "4/3", height: "auto" }}
+        className="bg-gray-800 rounded-lg sm:rounded-2xl md:rounded-3xl p-1 sm:p-3 md:p-4 lg:p-6 shadow-2xl"
+        style={{ 
+          aspectRatio: isMobile ? "9/16" : "4/3", 
+          width: isMobile ? "98vw" : "100%",
+          height: isMobile ? "98vh" : "auto",
+          maxWidth: isMobile ? "none" : "min(90vw, 90vh * 4/3)",
+          maxHeight: isMobile ? "none" : "90vh"
+        }}
       >
         <div className="w-full h-full bg-white rounded-2xl overflow-hidden flex relative">
-          {/* Map Button - 우측 상단 (매장명이 있을 때만 표시) */}
-          <Button
-            onClick={handleOpenMap}
-            className="absolute top-2 sm:top-3 md:top-4 right-11 sm:right-14 md:right-16 lg:right-20 z-10 bg-blue-600 hover:bg-blue-700 text-white p-1 sm:p-1.5 md:p-2 rounded-full"
-            size="sm"
-            title="네이버 지도에서 검색"
-          >
-            <MapPin className="w-3 sm:w-3.5 md:w-4 h-3 sm:h-3.5 md:h-4" />
-          </Button>
+          {/* Mobile: 하단에 배치, Desktop: 상단에 배치 */}
+          {isMobile ? (
+            <div className="absolute bottom-2 right-2 z-10 flex gap-1">
+              <Button
+                onClick={handleOpenMap}
+                className="bg-blue-600 hover:bg-blue-700 text-white p-1 rounded-full"
+                size="sm"
+                title="네이버 지도에서 검색"
+              >
+                <MapPin className="w-3 h-3" />
+              </Button>
+              <Button
+                onClick={handleDownloadHTML}
+                className="bg-green-600 hover:bg-green-700 text-white p-1 rounded-full"
+                size="sm"
+                title="HTML 파일 다운로드"
+              >
+                <Download className="w-3 h-3" />
+              </Button>
+              <Button
+                onClick={handleStoreSettingsOpen}
+                className="bg-gray-600 hover:bg-gray-700 text-white p-1 rounded-full"
+                size="sm"
+              >
+                <Settings className="w-3 h-3" />
+              </Button>
+            </div>
+          ) : (
+            <>
+              {/* Settings Button - 우측 상단 */}
+              <Button
+                onClick={handleStoreSettingsOpen}
+                className="absolute top-2 sm:top-3 md:top-4 right-2 sm:right-3 md:right-4 z-10 bg-gray-600 hover:bg-gray-700 text-white p-1 sm:p-1.5 md:p-2 rounded-full"
+                size="sm"
+              >
+                <Settings className="w-3 sm:w-3.5 md:w-4 h-3 sm:h-3.5 md:h-4" />
+              </Button>
 
-          {/* Download Button - 우측 상단 */}
-          <Button
-            onClick={handleDownloadHTML}
-            className="absolute top-2 sm:top-3 md:top-4 right-6 sm:right-8 md:right-9 lg:right-12 z-10 bg-green-600 hover:bg-green-700 text-white p-1 sm:p-1.5 md:p-2 rounded-full"
-            size="sm"
-            title="HTML 파일 다운로드"
-          >
-            <Download className="w-3 sm:w-3.5 md:w-4 h-3 sm:h-3.5 md:h-4" />
-          </Button>
+              {/* Download Button - 우측 상단 */}
+              <Button
+                onClick={handleDownloadHTML}
+                className="absolute top-2 sm:top-3 md:top-4 right-[2.5rem] sm:right-[3rem] md:right-[3.5rem] lg:right-[4rem] z-10 bg-green-600 hover:bg-green-700 text-white p-1 sm:p-1.5 md:p-2 rounded-full"
+                size="sm"
+                title="HTML 파일 다운로드"
+                style={{ marginRight: '5px' }}
+              >
+                <Download className="w-3 sm:w-3.5 md:w-4 h-3 sm:h-3.5 md:h-4" />
+              </Button>
 
-          {/* Settings Button - 우측 상단 */}
-          <Button
-            onClick={handleStoreSettingsOpen}
-            className="absolute top-2 sm:top-3 md:top-4 right-2 sm:right-3 md:right-4 z-10 bg-gray-600 hover:bg-gray-700 text-white p-1 sm:p-1.5 md:p-2 rounded-full"
-            size="sm"
-          >
-            <Settings className="w-3 sm:w-3.5 md:w-4 h-3 sm:h-3.5 md:h-4" />
-          </Button>
+              {/* Map Button - 우측 상단 (매장명이 있을 때만 표시) */}
+              <Button
+                onClick={handleOpenMap}
+                className="absolute top-2 sm:top-3 md:top-4 right-[5rem] sm:right-[5.75rem] md:right-[6.5rem] lg:right-[7.25rem] z-10 bg-blue-600 hover:bg-blue-700 text-white p-1 sm:p-1.5 md:p-2 rounded-full"
+                size="sm"
+                title="네이버 지도에서 검색"
+                style={{ marginRight: '5px' }}
+              >
+                <MapPin className="w-3 sm:w-3.5 md:w-4 h-3 sm:h-3.5 md:h-4" />
+              </Button>
+            </>
+          )}
 
           {/* Left Sidebar */}
-          <div className="w-20 sm:w-24 md:w-32 lg:w-36 bg-gray-800 text-white flex flex-col relative">
+          <div className={`${isMobile ? 'w-24' : 'w-20 sm:w-24 md:w-32 lg:w-36'} bg-gray-800 text-white flex flex-col relative`}>
             <div className="p-2 sm:p-3 md:p-4 text-center bg-[rgba(34,34,34,1)]">
               <div className="bg-white text-black rounded-lg sm:rounded-xl font-bold leading-tight text-sm sm:text-lg md:text-2xl lg:text-3xl text-center tracking-wide py-2 sm:py-3 md:py-4 mb-2 sm:mb-3 md:mb-4 mt-2 sm:mt-3 md:mt-4 leading-4 sm:leading-6 md:leading-8 px-2 sm:px-3 md:px-4 ml-px mr-0.5">
                 하이
@@ -1504,20 +1546,23 @@ export default function Component() {
               <div className="text-white font-bold mb-3 sm:mb-4 md:mb-6 text-xs sm:text-sm md:text-lg lg:text-2xl whitespace-pre-wrap text-center leading-tight">{storeName}</div>
             </div>
 
-            <div className="flex-1 px-0 mx-0 tracking-normal leading-7 border-0 bg-[rgba(34,34,34,1)]">
-              <div className="flex items-center px-2 sm:px-3 md:px-4 py-2 sm:py-3 border-l-4 border-cyan-400 mx-1 sm:mx-2 rounded-r bg-[rgba(61,61,61,1)]">
-                <img src="https://cdn-icons-png.flaticon.com/256/192/192732.png" className="mr-1 sm:mr-2 w-3 sm:w-4 md:w-5 lg:w-6 h-3 sm:h-4 md:h-5 lg:h-6 brightness-0 invert" alt="메뉴주문" />
-                <span className="text-xs sm:text-sm md:text-base tracking-normal font-extrabold leading-6 sm:leading-8 md:leading-10" style={{ whiteSpace: 'nowrap' }}>메뉴주문</span>
+            <div className="flex-1 px-0 mx-0 tracking-normal leading-7 border-0 bg-[rgba(34,34,34,1)] flex flex-col">
+              <div className={`flex items-center ${isMobile ? 'px-1 py-1.5 mx-0.5' : 'px-2 sm:px-3 md:px-4 py-2 sm:py-3 mx-1 sm:mx-2'} border-l-4 border-cyan-400 rounded-r bg-[rgba(61,61,61,1)]`}>
+                <img src="https://cdn-icons-png.flaticon.com/256/192/192732.png" className={`${isMobile ? 'mr-1 w-3 h-3' : 'mr-1 sm:mr-2 w-3 sm:w-4 md:w-5 lg:w-6 h-3 sm:h-4 md:h-5 lg:h-6'} brightness-0 invert`} alt="메뉴주문" />
+                <span className={`${isMobile ? 'text-xs' : 'text-xs sm:text-sm md:text-base'} tracking-normal font-extrabold leading-6 sm:leading-8 md:leading-10`} style={{ whiteSpace: 'nowrap' }}>메뉴주문</span>
               </div>
-            </div>
-
-            {/* Circular Call Staff Button - positioned absolutely */}
-            <div className="absolute bottom-3 sm:bottom-4 md:bottom-6 left-1/2 transform -translate-x-1/2">
-              <Button className="bg-cyan-400 hover:bg-cyan-500 font-bold rounded-full shadow-lg text-white text-xs sm:text-sm md:text-lg lg:text-xl leading-3 sm:leading-5 md:leading-7 tracking-normal h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 lg:h-24 lg:w-24">
-                직원
-                <br />
-                호출
-              </Button>
+              
+              {/* Spacer to push button to bottom */}
+              <div className="flex-1"></div>
+              
+              {/* Circular Call Staff Button */}
+              <div className={`${isMobile ? 'pb-2' : 'pb-3 sm:pb-4 md:pb-6'} flex justify-center`}>
+                <Button className={`bg-cyan-400 hover:bg-cyan-500 font-bold rounded-full shadow-lg text-white tracking-normal ${isMobile ? 'text-xs leading-3 h-10 w-10' : 'text-xs sm:text-sm md:text-lg lg:text-xl leading-3 sm:leading-5 md:leading-7 h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 lg:h-24 lg:w-24'}`}>
+                  직원
+                  <br />
+                  호출
+                </Button>
+              </div>
             </div>
           </div>
 
@@ -1525,12 +1570,12 @@ export default function Component() {
           <div className="flex-1 flex flex-col">
             {/* Header Tabs */}
             <div className="bg-white border-b border-gray-200">
-              <div className="flex px-2 sm:px-3 md:px-4 lg:px-6 pt-2 sm:pt-3 md:pt-4">
+              <div className={`flex ${isMobile ? 'px-1 pt-1' : 'px-2 sm:px-3 md:px-4 lg:px-6 pt-2 sm:pt-3 md:pt-4'}`}>
                 {tabs.map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`px-2 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base lg:text-lg font-medium border-b-3 transition-colors mr-2 sm:mr-4 md:mr-6 lg:mr-8 ${
+                    className={`${isMobile ? 'px-2 py-1.5 text-xs mr-1' : 'px-2 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base lg:text-lg mr-2 sm:mr-4 md:mr-6 lg:mr-8'} font-medium border-b-3 transition-colors ${
                       activeTab === tab
                         ? "text-cyan-500 border-cyan-500"
                         : "text-gray-600 border-transparent hover:text-gray-800"
@@ -1543,10 +1588,10 @@ export default function Component() {
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 p-2 sm:p-3 md:p-4 lg:p-6 overflow-auto border-0 leading-7 tracking-normal">
-              <h2 className="font-medium text-gray-600 mb-3 sm:mb-4 md:mb-6 text-sm sm:text-lg md:text-xl lg:text-2xl">{activeTab}</h2>
+            <div className={`flex-1 ${isMobile ? 'p-1' : 'p-2 sm:p-3 md:p-4 lg:p-6'} overflow-auto border-0 leading-7 tracking-normal`}>
+              <h2 className={`font-medium text-gray-600 ${isMobile ? 'mb-2 text-sm' : 'mb-3 sm:mb-4 md:mb-6 text-sm sm:text-lg md:text-xl lg:text-2xl'}`}>{activeTab}</h2>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4 lg:gap-6">
+              <div className={`grid gap-2 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4 lg:gap-6'}`}>
                 {filteredFoodItems.map((item) => (
                                       <Card key={item.id} className="overflow-hidden shadow-md hover:shadow-lg transition-shadow">
                       <div className="relative">
@@ -1581,15 +1626,15 @@ export default function Component() {
             </div>
 
             {/* Bottom Action Bar */}
-            <div className="bg-white border-t border-gray-200 p-2 sm:p-3 md:p-4 lg:p-6 flex items-end justify-end">
-              <div className="flex gap-2 sm:gap-3 md:gap-4">
+            <div className={`bg-white border-t border-gray-200 ${isMobile ? 'p-1 pb-12' : 'p-2 sm:p-3 md:p-4 lg:p-6'} flex items-end justify-end`}>
+              <div className={`flex ${isMobile ? 'gap-1' : 'gap-2 sm:gap-3 md:gap-4'}`}>
                 <Dialog open={showOrderHistory} onOpenChange={setShowOrderHistory}>
                   <DialogTrigger asChild>
                     <Button
                       variant="outline"
-                      className="flex items-center gap-1 sm:gap-2 bg-white border-gray-300 text-gray-600 hover:bg-gray-50 px-2 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base"
+                      className={`flex items-center gap-1 sm:gap-2 bg-white border-gray-300 text-gray-600 hover:bg-gray-50 ${isMobile ? 'px-2 py-1.5 text-xs' : 'px-2 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base'}`}
                     >
-                      <Menu className="w-3 sm:w-4 h-3 sm:h-4" />
+                      <Menu className={`${isMobile ? 'w-3 h-3' : 'w-3 sm:w-4 h-3 sm:h-4'}`} />
                       주문내역
                     </Button>
                   </DialogTrigger>
@@ -1636,11 +1681,11 @@ export default function Component() {
                 <AlertDialog open={showOrderConfirm} onOpenChange={setShowOrderConfirm}>
                   <AlertDialogTrigger asChild>
                     <Button 
-                      className="bg-cyan-400 hover:bg-cyan-500 text-black font-bold px-3 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-2.5 md:py-3 relative text-xs sm:text-sm md:text-base"
+                      className={`bg-cyan-400 hover:bg-cyan-500 text-black font-bold relative ${isMobile ? 'px-3 py-1.5 text-xs' : 'px-3 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base'}`}
                       disabled={orderItems.length === 0}
                     >
                       주문하기
-                      <Badge className="absolute -top-1 sm:-top-2 -right-1 sm:-right-2 bg-cyan-600 text-white rounded-full w-4 sm:w-5 md:w-6 h-4 sm:h-5 md:h-6 flex items-center justify-center text-xs font-bold">
+                      <Badge className={`absolute -top-1 sm:-top-2 -right-1 sm:-right-2 bg-cyan-600 text-white rounded-full flex items-center justify-center text-xs font-bold ${isMobile ? 'w-4 h-4' : 'w-4 sm:w-5 md:w-6 h-4 sm:h-5 md:h-6'}`}>
                         {getCartCount()}
                       </Badge>
                     </Button>
