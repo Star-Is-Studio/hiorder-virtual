@@ -22,8 +22,8 @@
 
 1. 프로젝트 대시보드에서 **Settings** → **API** 클릭
 2. 다음 정보를 복사해둡니다:
-   - **Project URL**: `https://your-project-ref.supabase.co`
-   - **anon public**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
+   - **Project URL**: `https://ibxuecfsiuwqsgdzjzek.supabase.co`
+   - **anon public**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlieHVlY2ZzaXV3cXNnZHpqemVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyODgwNTAsImV4cCI6MjA2Njg2NDA1MH0.wRoV9hKgZkhsarehbFiFcv5F2w8BF7838P1Ei-epfkY`
 
 ## 🗄️ 4단계: 데이터베이스 테이블 생성
 
