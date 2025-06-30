@@ -69,6 +69,7 @@ export default function Component() {
   const [tempMenuCategory, setTempMenuCategory] = useState("")
   const [isMobile, setIsMobile] = useState(false)
   const [isTablet, setIsTablet] = useState(false)
+  const [isLandscape, setIsLandscape] = useState(false)
   
   // 저장/불러오기 관련 상태
   const [savedMenuBoards, setSavedMenuBoards] = useState<any[]>([])
@@ -81,6 +82,7 @@ export default function Component() {
       const height = window.innerHeight
       setIsMobile(width < 768)
       setIsTablet(width >= 768 && width <= 1024)
+      setIsLandscape(width > height) // 가로가 세로보다 길면 랜드스케이프
     }
     
     checkDeviceType()
@@ -1607,39 +1609,39 @@ export default function Component() {
       <div
         className="bg-gray-800 rounded-lg sm:rounded-2xl md:rounded-3xl p-1 sm:p-3 md:p-4 lg:p-6 shadow-2xl"
         style={{ 
-          aspectRatio: isMobile ? "9/16" : isTablet ? "16/10" : "4/3", 
-          width: isMobile ? "98vw" : isTablet ? "92vw" : "100%",
-          height: isMobile ? "98vh" : isTablet ? "78vh" : "auto",
+          aspectRatio: isMobile && !isLandscape ? "9/16" : isMobile && isLandscape ? "16/9" : isTablet ? "16/10" : "4/3", 
+          width: isMobile && !isLandscape ? "98vw" : isMobile && isLandscape ? "98vw" : isTablet ? "92vw" : "100%",
+          height: isMobile && !isLandscape ? "98vh" : isMobile && isLandscape ? "95vh" : isTablet ? "78vh" : "auto",
           maxWidth: isMobile ? "none" : isTablet ? "none" : "min(90vw, 90vh * 4/3)",
-          maxHeight: isMobile ? "none" : isTablet ? "78vh" : "90vh"
+          maxHeight: isMobile && !isLandscape ? "none" : isMobile && isLandscape ? "95vh" : isTablet ? "78vh" : "90vh"
         }}
       >
         <div className="w-full h-full bg-white rounded-2xl overflow-hidden flex relative">
           {/* Mobile/Tablet: 하단에 배치, Desktop: 상단에 배치 */}
           {isMobile || isTablet ? (
-            <div className="absolute bottom-2 right-2 z-10 flex gap-1">
+            <div className={`absolute z-10 flex gap-1 ${isMobile && isLandscape ? 'bottom-1 right-1' : 'bottom-2 right-2'}`}>
               <Button
                 onClick={handleOpenMap}
-                className={`bg-blue-600 hover:bg-blue-700 text-white rounded-full ${isTablet ? 'p-2' : 'p-1'}`}
+                className={`bg-blue-600 hover:bg-blue-700 text-white rounded-full ${isTablet ? 'p-2' : isMobile && isLandscape ? 'p-0.5' : 'p-1'}`}
                 size="sm"
                 title="네이버 지도에서 검색"
               >
-                <MapPin className={`${isTablet ? 'w-4 h-4' : 'w-3 h-3'}`} />
+                <MapPin className={`${isTablet ? 'w-4 h-4' : isMobile && isLandscape ? 'w-2.5 h-2.5' : 'w-3 h-3'}`} />
               </Button>
               <Button
                 onClick={handleDownloadHTML}
-                className={`bg-green-600 hover:bg-green-700 text-white rounded-full ${isTablet ? 'p-2' : 'p-1'}`}
+                className={`bg-green-600 hover:bg-green-700 text-white rounded-full ${isTablet ? 'p-2' : isMobile && isLandscape ? 'p-0.5' : 'p-1'}`}
                 size="sm"
                 title="HTML 파일 다운로드"
               >
-                <Download className={`${isTablet ? 'w-4 h-4' : 'w-3 h-3'}`} />
+                <Download className={`${isTablet ? 'w-4 h-4' : isMobile && isLandscape ? 'w-2.5 h-2.5' : 'w-3 h-3'}`} />
               </Button>
               <Button
                 onClick={handleStoreSettingsOpen}
-                className={`bg-gray-600 hover:bg-gray-700 text-white rounded-full ${isTablet ? 'p-2' : 'p-1'}`}
+                className={`bg-gray-600 hover:bg-gray-700 text-white rounded-full ${isTablet ? 'p-2' : isMobile && isLandscape ? 'p-0.5' : 'p-1'}`}
                 size="sm"
               >
-                <Settings className={`${isTablet ? 'w-4 h-4' : 'w-3 h-3'}`} />
+                <Settings className={`${isTablet ? 'w-4 h-4' : isMobile && isLandscape ? 'w-2.5 h-2.5' : 'w-3 h-3'}`} />
               </Button>
             </div>
           ) : (
@@ -1678,28 +1680,28 @@ export default function Component() {
           )}
 
           {/* Left Sidebar */}
-          <div className={`${isMobile ? 'w-24' : isTablet ? 'w-28' : 'w-20 sm:w-24 md:w-32 lg:w-36'} bg-gray-800 text-white flex flex-col relative`}>
-            <div className={`text-center bg-[rgba(34,34,34,1)] ${isMobile ? 'p-1.5' : isTablet ? 'p-1.5' : 'p-2 sm:p-3 md:p-4'}`}>
-              <div className={`bg-white text-black rounded-lg sm:rounded-xl font-bold leading-tight text-center tracking-wide ml-px mr-0.5 ${isMobile ? 'text-xs py-1.5 mb-1.5 mt-1.5 px-2' : isTablet ? 'text-sm py-2 mb-2 mt-2 px-2 leading-4' : 'text-sm sm:text-lg md:text-2xl lg:text-3xl py-2 sm:py-3 md:py-4 mb-2 sm:mb-3 md:mb-4 mt-2 sm:mt-3 md:mt-4 leading-4 sm:leading-6 md:leading-8 px-2 sm:px-3 md:px-4'}`}>
+          <div className={`${isMobile && !isLandscape ? 'w-24' : isMobile && isLandscape ? 'w-20' : isTablet ? 'w-28' : 'w-20 sm:w-24 md:w-32 lg:w-36'} bg-gray-800 text-white flex flex-col relative`}>
+            <div className={`text-center bg-[rgba(34,34,34,1)] ${isMobile && !isLandscape ? 'p-1.5' : isMobile && isLandscape ? 'p-1' : isTablet ? 'p-1.5' : 'p-2 sm:p-3 md:p-4'}`}>
+              <div className={`bg-white text-black rounded-lg sm:rounded-xl font-bold leading-tight text-center tracking-wide ml-px mr-0.5 ${isMobile && !isLandscape ? 'text-xs py-1.5 mb-1.5 mt-1.5 px-2' : isMobile && isLandscape ? 'text-xs py-1 mb-1 mt-1 px-1.5 leading-3' : isTablet ? 'text-sm py-2 mb-2 mt-2 px-2 leading-4' : 'text-sm sm:text-lg md:text-2xl lg:text-3xl py-2 sm:py-3 md:py-4 mb-2 sm:mb-3 md:mb-4 mt-2 sm:mt-3 md:mt-4 leading-4 sm:leading-6 md:leading-8 px-2 sm:px-3 md:px-4'}`}>
                 하이
                 <br />
                 오더
               </div>
-              <div className={`text-white font-bold whitespace-pre-wrap text-center leading-tight ${isMobile ? 'mb-2 text-xs' : isTablet ? 'mb-2 text-xs' : 'mb-3 sm:mb-4 md:mb-6 text-xs sm:text-sm md:text-lg lg:text-2xl'}`}>{storeName}</div>
+              <div className={`text-white font-bold whitespace-pre-wrap text-center leading-tight ${isMobile && !isLandscape ? 'mb-2 text-xs' : isMobile && isLandscape ? 'mb-1 text-xs' : isTablet ? 'mb-2 text-xs' : 'mb-3 sm:mb-4 md:mb-6 text-xs sm:text-sm md:text-lg lg:text-2xl'}`}>{storeName}</div>
             </div>
 
             <div className="flex-1 px-0 mx-0 tracking-normal leading-7 border-0 bg-[rgba(34,34,34,1)] flex flex-col">
-              <div className={`flex items-center ${isMobile ? 'px-1 py-1.5 mx-0.5' : isTablet ? 'px-1.5 py-1.5 mx-0.5' : 'px-2 sm:px-3 md:px-4 py-2 sm:py-3 mx-1 sm:mx-2'} border-l-4 border-cyan-400 rounded-r bg-[rgba(61,61,61,1)]`}>
-                <img src="https://cdn-icons-png.flaticon.com/256/192/192732.png" className={`${isMobile ? 'mr-1 w-3 h-3' : isTablet ? 'mr-1 w-3 h-3' : 'mr-1 sm:mr-2 w-3 sm:w-4 md:w-5 lg:w-6 h-3 sm:h-4 md:h-5 lg:h-6'} brightness-0 invert`} alt="메뉴주문" />
-                <span className={`${isMobile ? 'text-xs' : isTablet ? 'text-xs' : 'text-xs sm:text-sm md:text-base'} tracking-normal font-extrabold leading-6 sm:leading-8 md:leading-10`} style={{ whiteSpace: 'nowrap' }}>메뉴주문</span>
+              <div className={`flex items-center ${isMobile && !isLandscape ? 'px-1 py-1.5 mx-0.5' : isMobile && isLandscape ? 'px-0.5 py-1 mx-0.5' : isTablet ? 'px-1.5 py-1.5 mx-0.5' : 'px-2 sm:px-3 md:px-4 py-2 sm:py-3 mx-1 sm:mx-2'} border-l-4 border-cyan-400 rounded-r bg-[rgba(61,61,61,1)]`}>
+                <img src="https://cdn-icons-png.flaticon.com/256/192/192732.png" className={`${isMobile && !isLandscape ? 'mr-1 w-3 h-3' : isMobile && isLandscape ? 'mr-0.5 w-2.5 h-2.5' : isTablet ? 'mr-1 w-3 h-3' : 'mr-1 sm:mr-2 w-3 sm:w-4 md:w-5 lg:w-6 h-3 sm:h-4 md:h-5 lg:h-6'} brightness-0 invert`} alt="메뉴주문" />
+                <span className={`${isMobile && !isLandscape ? 'text-xs' : isMobile && isLandscape ? 'text-xs' : isTablet ? 'text-xs' : 'text-xs sm:text-sm md:text-base'} tracking-normal font-extrabold leading-6 sm:leading-8 md:leading-10`} style={{ whiteSpace: 'nowrap' }}>메뉴주문</span>
               </div>
               
               {/* Spacer to push button to bottom */}
               <div className="flex-1"></div>
               
               {/* Circular Call Staff Button */}
-              <div className={`${isMobile ? 'pb-2' : isTablet ? 'pb-2' : 'pb-3 sm:pb-4 md:pb-6'} flex justify-center`}>
-                <Button className={`bg-cyan-400 hover:bg-cyan-500 font-bold rounded-full shadow-lg text-white tracking-normal ${isMobile ? 'text-xs leading-3 h-10 w-10' : isTablet ? 'text-xs leading-3 h-12 w-12' : 'text-xs sm:text-sm md:text-lg lg:text-xl leading-3 sm:leading-5 md:leading-7 h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 lg:h-24 lg:w-24'}`}>
+              <div className={`${isMobile && !isLandscape ? 'pb-2' : isMobile && isLandscape ? 'pb-1.5' : isTablet ? 'pb-2' : 'pb-3 sm:pb-4 md:pb-6'} flex justify-center`}>
+                <Button className={`bg-cyan-400 hover:bg-cyan-500 font-bold rounded-full shadow-lg text-white tracking-normal ${isMobile && !isLandscape ? 'text-xs leading-3 h-10 w-10' : isMobile && isLandscape ? 'text-xs leading-3 h-8 w-8' : isTablet ? 'text-xs leading-3 h-12 w-12' : 'text-xs sm:text-sm md:text-lg lg:text-xl leading-3 sm:leading-5 md:leading-7 h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 lg:h-24 lg:w-24'}`}>
                   직원
                   <br />
                   호출
@@ -1712,12 +1714,12 @@ export default function Component() {
           <div className="flex-1 flex flex-col">
             {/* Header Tabs */}
             <div className="bg-white border-b border-gray-200">
-              <div className={`flex ${isMobile ? 'px-1 pt-1' : isTablet ? 'px-2 pt-1' : 'px-2 sm:px-3 md:px-4 lg:px-6 pt-2 sm:pt-3 md:pt-4'}`}>
+              <div className={`flex ${isMobile && !isLandscape ? 'px-1 pt-1' : isMobile && isLandscape ? 'px-1 pt-0.5' : isTablet ? 'px-2 pt-1' : 'px-2 sm:px-3 md:px-4 lg:px-6 pt-2 sm:pt-3 md:pt-4'}`}>
                 {tabs.map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`${isMobile ? 'px-2 py-1.5 text-xs mr-1' : isTablet ? 'px-2 py-1.5 text-xs mr-1' : 'px-2 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base lg:text-lg mr-2 sm:mr-4 md:mr-6 lg:mr-8'} font-medium border-b-3 transition-colors ${
+                    className={`${isMobile && !isLandscape ? 'px-2 py-1.5 text-xs mr-1' : isMobile && isLandscape ? 'px-1.5 py-1 text-xs mr-0.5' : isTablet ? 'px-2 py-1.5 text-xs mr-1' : 'px-2 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base lg:text-lg mr-2 sm:mr-4 md:mr-6 lg:mr-8'} font-medium border-b-3 transition-colors ${
                       activeTab === tab
                         ? "text-cyan-500 border-cyan-500"
                         : "text-gray-600 border-transparent hover:text-gray-800"
@@ -1730,10 +1732,10 @@ export default function Component() {
             </div>
 
             {/* Content Area */}
-            <div className={`flex-1 ${isMobile ? 'p-1' : isTablet ? 'p-1.5' : 'p-2 sm:p-3 md:p-4 lg:p-6'} overflow-auto border-0 leading-7 tracking-normal`}>
-              <h2 className={`font-medium text-gray-600 ${isMobile ? 'mb-2 text-sm' : isTablet ? 'mb-1.5 text-sm' : 'mb-3 sm:mb-4 md:mb-6 text-sm sm:text-lg md:text-xl lg:text-2xl'}`}>{activeTab}</h2>
+            <div className={`flex-1 ${isMobile && !isLandscape ? 'p-1' : isMobile && isLandscape ? 'p-0.5' : isTablet ? 'p-1.5' : 'p-2 sm:p-3 md:p-4 lg:p-6'} overflow-auto border-0 leading-7 tracking-normal`}>
+              <h2 className={`font-medium text-gray-600 ${isMobile && !isLandscape ? 'mb-2 text-sm' : isMobile && isLandscape ? 'mb-1 text-xs' : isTablet ? 'mb-1.5 text-sm' : 'mb-3 sm:mb-4 md:mb-6 text-sm sm:text-lg md:text-xl lg:text-2xl'}`}>{activeTab}</h2>
 
-              <div className={`grid gap-2 ${isMobile ? 'grid-cols-1' : isTablet ? 'grid-cols-2 gap-2' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4 lg:gap-6'}`}>
+              <div className={`grid ${isMobile && !isLandscape ? 'grid-cols-1 gap-2' : isMobile && isLandscape ? 'grid-cols-3 gap-1.5' : isTablet ? 'grid-cols-2 gap-2' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4 lg:gap-6'}`}>
                 {filteredFoodItems.map((item) => (
                                       <Card key={item.id} className="overflow-hidden shadow-md hover:shadow-lg transition-shadow">
                       <div className="relative">
@@ -1742,7 +1744,7 @@ export default function Component() {
                           alt={item.name}
                           width={280}
                           height={180}
-                          className={`w-full object-cover ${isMobile ? 'h-24' : isTablet ? 'h-24' : 'h-24 sm:h-32 md:h-36 lg:h-44'}`}
+                          className={`w-full object-cover ${isMobile && !isLandscape ? 'h-24' : isMobile && isLandscape ? 'h-16' : isTablet ? 'h-24' : 'h-24 sm:h-32 md:h-36 lg:h-44'}`}
                         />
                         {item.badge && (
                           <Badge className="absolute top-1 sm:top-2 md:top-3 right-1 sm:right-2 md:right-3 bg-gray-800 text-white px-1 sm:px-2 py-0.5 sm:py-1 text-xs">
@@ -1750,13 +1752,13 @@ export default function Component() {
                           </Badge>
                         )}
                       </div>
-                      <CardContent className={`${isMobile ? 'p-2' : isTablet ? 'p-3' : 'p-2 sm:p-3 md:p-4'}`}>
-                        <h3 className={`font-medium mb-2 ${isMobile ? 'text-sm' : isTablet ? 'text-base' : 'text-sm sm:text-base md:text-lg mb-2 sm:mb-3'}`}>{item.name}</h3>
+                      <CardContent className={`${isMobile && !isLandscape ? 'p-2' : isMobile && isLandscape ? 'p-1.5' : isTablet ? 'p-3' : 'p-2 sm:p-3 md:p-4'}`}>
+                        <h3 className={`font-medium ${isMobile && !isLandscape ? 'text-sm mb-2' : isMobile && isLandscape ? 'text-xs mb-1' : isTablet ? 'text-base mb-2' : 'text-sm sm:text-base md:text-lg mb-2 sm:mb-3'}`}>{item.name}</h3>
                         <div className="flex items-center justify-between">
-                          <span className={`font-bold ${isMobile ? 'text-sm' : isTablet ? 'text-base' : 'text-sm sm:text-base md:text-lg'}`}>{item.price}</span>
+                          <span className={`font-bold ${isMobile && !isLandscape ? 'text-sm' : isMobile && isLandscape ? 'text-xs' : isTablet ? 'text-base' : 'text-sm sm:text-base md:text-lg'}`}>{item.price}</span>
                           <Button
                             onClick={() => handleAddToCart(item)}
-                            className={`bg-gray-800 hover:bg-gray-700 text-white font-medium ${isMobile ? 'px-2 py-1 text-xs' : isTablet ? 'px-3 py-1.5 text-sm' : 'px-2 sm:px-3 md:px-4 lg:px-6 py-1 sm:py-1.5 md:py-2 text-xs sm:text-sm md:text-base'}`}
+                            className={`bg-gray-800 hover:bg-gray-700 text-white font-medium ${isMobile && !isLandscape ? 'px-2 py-1 text-xs' : isMobile && isLandscape ? 'px-1.5 py-0.5 text-xs' : isTablet ? 'px-3 py-1.5 text-sm' : 'px-2 sm:px-3 md:px-4 lg:px-6 py-1 sm:py-1.5 md:py-2 text-xs sm:text-sm md:text-base'}`}
                           >
                             담기
                           </Button>
@@ -1767,16 +1769,16 @@ export default function Component() {
               </div>
             </div>
 
-            {/* Bottom Action Bar */}
-            <div className={`bg-white border-t border-gray-200 ${isMobile ? 'p-1 pb-12' : isTablet ? 'p-1.5 pb-12' : 'p-2 sm:p-3 md:p-4 lg:p-6'} flex items-end justify-end`}>
-                              <div className={`flex ${isMobile ? 'gap-1' : isTablet ? 'gap-1.5' : 'gap-2 sm:gap-3 md:gap-4'}`}>
+                        {/* Bottom Action Bar */}
+            <div className={`bg-white border-t border-gray-200 ${isMobile && !isLandscape ? 'p-1 pb-12' : isMobile && isLandscape ? 'p-1 pb-8' : isTablet ? 'p-1.5 pb-12' : 'p-2 sm:p-3 md:p-4 lg:p-6'} flex items-end justify-end`}>
+              <div className={`flex ${isMobile && !isLandscape ? 'gap-1' : isMobile && isLandscape ? 'gap-1' : isTablet ? 'gap-1.5' : 'gap-2 sm:gap-3 md:gap-4'}`}>
                 <Dialog open={showOrderHistory} onOpenChange={setShowOrderHistory}>
                   <DialogTrigger asChild>
                     <Button
                       variant="outline"
-                      className={`flex items-center gap-1 sm:gap-2 bg-white border-gray-300 text-gray-600 hover:bg-gray-50 ${isMobile ? 'px-2 py-1.5 text-xs' : isTablet ? 'px-2 py-1.5 text-xs' : 'px-2 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base'}`}
+                      className={`flex items-center gap-1 sm:gap-2 bg-white border-gray-300 text-gray-600 hover:bg-gray-50 ${isMobile && !isLandscape ? 'px-2 py-1.5 text-xs' : isMobile && isLandscape ? 'px-1.5 py-1 text-xs' : isTablet ? 'px-2 py-1.5 text-xs' : 'px-2 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base'}`}
                     >
-                      <Menu className={`${isMobile ? 'w-3 h-3' : isTablet ? 'w-3 h-3' : 'w-3 sm:w-4 h-3 sm:h-4'}`} />
+                      <Menu className={`${isMobile && !isLandscape ? 'w-3 h-3' : isMobile && isLandscape ? 'w-2.5 h-2.5' : isTablet ? 'w-3 h-3' : 'w-3 sm:w-4 h-3 sm:h-4'}`} />
                       주문내역
                     </Button>
                   </DialogTrigger>
@@ -1822,15 +1824,15 @@ export default function Component() {
 
                 <AlertDialog open={showOrderConfirm} onOpenChange={setShowOrderConfirm}>
                   <AlertDialogTrigger asChild>
-                                      <Button 
-                    className={`bg-cyan-400 hover:bg-cyan-500 text-black font-bold relative ${isMobile ? 'px-3 py-1.5 text-xs' : isTablet ? 'px-3 py-1.5 text-xs' : 'px-3 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base'}`}
+                                                        <Button 
+                    className={`bg-cyan-400 hover:bg-cyan-500 text-black font-bold relative ${isMobile && !isLandscape ? 'px-3 py-1.5 text-xs' : isMobile && isLandscape ? 'px-2.5 py-1 text-xs' : isTablet ? 'px-3 py-1.5 text-xs' : 'px-3 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base'}`}
                     disabled={orderItems.length === 0}
                   >
-                      주문하기
-                      <Badge className={`absolute -top-1 sm:-top-2 -right-1 sm:-right-2 bg-cyan-600 text-white rounded-full flex items-center justify-center text-xs font-bold ${isMobile ? 'w-4 h-4' : isTablet ? 'w-4 h-4' : 'w-4 sm:w-5 md:w-6 h-4 sm:h-5 md:h-6'}`}>
-                        {getCartCount()}
-                      </Badge>
-                    </Button>
+                    주문하기
+                    <Badge className={`absolute -top-1 sm:-top-2 -right-1 sm:-right-2 bg-cyan-600 text-white rounded-full flex items-center justify-center text-xs font-bold ${isMobile && !isLandscape ? 'w-4 h-4' : isMobile && isLandscape ? 'w-3.5 h-3.5' : isTablet ? 'w-4 h-4' : 'w-4 sm:w-5 md:w-6 h-4 sm:h-5 md:h-6'}`}>
+                      {getCartCount()}
+                    </Badge>
+                  </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
