@@ -1608,10 +1608,10 @@ export default function Component() {
         className="bg-gray-800 rounded-lg sm:rounded-2xl md:rounded-3xl p-1 sm:p-3 md:p-4 lg:p-6 shadow-2xl"
         style={{ 
           aspectRatio: isMobile ? "9/16" : isTablet ? "16/10" : "4/3", 
-          width: isMobile ? "98vw" : isTablet ? "95vw" : "100%",
-          height: isMobile ? "98vh" : isTablet ? "85vh" : "auto",
+          width: isMobile ? "98vw" : isTablet ? "92vw" : "100%",
+          height: isMobile ? "98vh" : isTablet ? "78vh" : "auto",
           maxWidth: isMobile ? "none" : isTablet ? "none" : "min(90vw, 90vh * 4/3)",
-          maxHeight: isMobile ? "none" : isTablet ? "85vh" : "90vh"
+          maxHeight: isMobile ? "none" : isTablet ? "78vh" : "90vh"
         }}
       >
         <div className="w-full h-full bg-white rounded-2xl overflow-hidden flex relative">
@@ -1679,27 +1679,27 @@ export default function Component() {
 
           {/* Left Sidebar */}
           <div className={`${isMobile ? 'w-24' : isTablet ? 'w-28' : 'w-20 sm:w-24 md:w-32 lg:w-36'} bg-gray-800 text-white flex flex-col relative`}>
-            <div className="p-2 sm:p-3 md:p-4 text-center bg-[rgba(34,34,34,1)]">
-              <div className="bg-white text-black rounded-lg sm:rounded-xl font-bold leading-tight text-sm sm:text-lg md:text-2xl lg:text-3xl text-center tracking-wide py-2 sm:py-3 md:py-4 mb-2 sm:mb-3 md:mb-4 mt-2 sm:mt-3 md:mt-4 leading-4 sm:leading-6 md:leading-8 px-2 sm:px-3 md:px-4 ml-px mr-0.5">
+            <div className={`text-center bg-[rgba(34,34,34,1)] ${isMobile ? 'p-1.5' : isTablet ? 'p-1.5' : 'p-2 sm:p-3 md:p-4'}`}>
+              <div className={`bg-white text-black rounded-lg sm:rounded-xl font-bold leading-tight text-center tracking-wide ml-px mr-0.5 ${isMobile ? 'text-xs py-1.5 mb-1.5 mt-1.5 px-2' : isTablet ? 'text-sm py-2 mb-2 mt-2 px-2 leading-4' : 'text-sm sm:text-lg md:text-2xl lg:text-3xl py-2 sm:py-3 md:py-4 mb-2 sm:mb-3 md:mb-4 mt-2 sm:mt-3 md:mt-4 leading-4 sm:leading-6 md:leading-8 px-2 sm:px-3 md:px-4'}`}>
                 하이
                 <br />
                 오더
               </div>
-              <div className="text-white font-bold mb-3 sm:mb-4 md:mb-6 text-xs sm:text-sm md:text-lg lg:text-2xl whitespace-pre-wrap text-center leading-tight">{storeName}</div>
+              <div className={`text-white font-bold whitespace-pre-wrap text-center leading-tight ${isMobile ? 'mb-2 text-xs' : isTablet ? 'mb-2 text-xs' : 'mb-3 sm:mb-4 md:mb-6 text-xs sm:text-sm md:text-lg lg:text-2xl'}`}>{storeName}</div>
             </div>
 
             <div className="flex-1 px-0 mx-0 tracking-normal leading-7 border-0 bg-[rgba(34,34,34,1)] flex flex-col">
-              <div className={`flex items-center ${isMobile ? 'px-1 py-1.5 mx-0.5' : isTablet ? 'px-2 py-2 mx-1' : 'px-2 sm:px-3 md:px-4 py-2 sm:py-3 mx-1 sm:mx-2'} border-l-4 border-cyan-400 rounded-r bg-[rgba(61,61,61,1)]`}>
-                <img src="https://cdn-icons-png.flaticon.com/256/192/192732.png" className={`${isMobile ? 'mr-1 w-3 h-3' : isTablet ? 'mr-1.5 w-4 h-4' : 'mr-1 sm:mr-2 w-3 sm:w-4 md:w-5 lg:w-6 h-3 sm:h-4 md:h-5 lg:h-6'} brightness-0 invert`} alt="메뉴주문" />
-                <span className={`${isMobile ? 'text-xs' : isTablet ? 'text-sm' : 'text-xs sm:text-sm md:text-base'} tracking-normal font-extrabold leading-6 sm:leading-8 md:leading-10`} style={{ whiteSpace: 'nowrap' }}>메뉴주문</span>
+              <div className={`flex items-center ${isMobile ? 'px-1 py-1.5 mx-0.5' : isTablet ? 'px-1.5 py-1.5 mx-0.5' : 'px-2 sm:px-3 md:px-4 py-2 sm:py-3 mx-1 sm:mx-2'} border-l-4 border-cyan-400 rounded-r bg-[rgba(61,61,61,1)]`}>
+                <img src="https://cdn-icons-png.flaticon.com/256/192/192732.png" className={`${isMobile ? 'mr-1 w-3 h-3' : isTablet ? 'mr-1 w-3 h-3' : 'mr-1 sm:mr-2 w-3 sm:w-4 md:w-5 lg:w-6 h-3 sm:h-4 md:h-5 lg:h-6'} brightness-0 invert`} alt="메뉴주문" />
+                <span className={`${isMobile ? 'text-xs' : isTablet ? 'text-xs' : 'text-xs sm:text-sm md:text-base'} tracking-normal font-extrabold leading-6 sm:leading-8 md:leading-10`} style={{ whiteSpace: 'nowrap' }}>메뉴주문</span>
               </div>
               
               {/* Spacer to push button to bottom */}
               <div className="flex-1"></div>
               
               {/* Circular Call Staff Button */}
-              <div className={`${isMobile ? 'pb-2' : isTablet ? 'pb-3' : 'pb-3 sm:pb-4 md:pb-6'} flex justify-center`}>
-                <Button className={`bg-cyan-400 hover:bg-cyan-500 font-bold rounded-full shadow-lg text-white tracking-normal ${isMobile ? 'text-xs leading-3 h-10 w-10' : isTablet ? 'text-sm leading-4 h-14 w-14' : 'text-xs sm:text-sm md:text-lg lg:text-xl leading-3 sm:leading-5 md:leading-7 h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 lg:h-24 lg:w-24'}`}>
+              <div className={`${isMobile ? 'pb-2' : isTablet ? 'pb-2' : 'pb-3 sm:pb-4 md:pb-6'} flex justify-center`}>
+                <Button className={`bg-cyan-400 hover:bg-cyan-500 font-bold rounded-full shadow-lg text-white tracking-normal ${isMobile ? 'text-xs leading-3 h-10 w-10' : isTablet ? 'text-xs leading-3 h-12 w-12' : 'text-xs sm:text-sm md:text-lg lg:text-xl leading-3 sm:leading-5 md:leading-7 h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 lg:h-24 lg:w-24'}`}>
                   직원
                   <br />
                   호출
@@ -1712,12 +1712,12 @@ export default function Component() {
           <div className="flex-1 flex flex-col">
             {/* Header Tabs */}
             <div className="bg-white border-b border-gray-200">
-              <div className={`flex ${isMobile ? 'px-1 pt-1' : 'px-2 sm:px-3 md:px-4 lg:px-6 pt-2 sm:pt-3 md:pt-4'}`}>
+              <div className={`flex ${isMobile ? 'px-1 pt-1' : isTablet ? 'px-2 pt-1' : 'px-2 sm:px-3 md:px-4 lg:px-6 pt-2 sm:pt-3 md:pt-4'}`}>
                 {tabs.map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`${isMobile ? 'px-2 py-1.5 text-xs mr-1' : isTablet ? 'px-3 py-2 text-sm mr-1.5' : 'px-2 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base lg:text-lg mr-2 sm:mr-4 md:mr-6 lg:mr-8'} font-medium border-b-3 transition-colors ${
+                    className={`${isMobile ? 'px-2 py-1.5 text-xs mr-1' : isTablet ? 'px-2 py-1.5 text-xs mr-1' : 'px-2 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base lg:text-lg mr-2 sm:mr-4 md:mr-6 lg:mr-8'} font-medium border-b-3 transition-colors ${
                       activeTab === tab
                         ? "text-cyan-500 border-cyan-500"
                         : "text-gray-600 border-transparent hover:text-gray-800"
@@ -1730,10 +1730,10 @@ export default function Component() {
             </div>
 
             {/* Content Area */}
-            <div className={`flex-1 ${isMobile ? 'p-1' : isTablet ? 'p-2' : 'p-2 sm:p-3 md:p-4 lg:p-6'} overflow-auto border-0 leading-7 tracking-normal`}>
-              <h2 className={`font-medium text-gray-600 ${isMobile ? 'mb-2 text-sm' : isTablet ? 'mb-2 text-base' : 'mb-3 sm:mb-4 md:mb-6 text-sm sm:text-lg md:text-xl lg:text-2xl'}`}>{activeTab}</h2>
+            <div className={`flex-1 ${isMobile ? 'p-1' : isTablet ? 'p-1.5' : 'p-2 sm:p-3 md:p-4 lg:p-6'} overflow-auto border-0 leading-7 tracking-normal`}>
+              <h2 className={`font-medium text-gray-600 ${isMobile ? 'mb-2 text-sm' : isTablet ? 'mb-1.5 text-sm' : 'mb-3 sm:mb-4 md:mb-6 text-sm sm:text-lg md:text-xl lg:text-2xl'}`}>{activeTab}</h2>
 
-              <div className={`grid gap-2 ${isMobile ? 'grid-cols-1' : isTablet ? 'grid-cols-2 gap-3' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4 lg:gap-6'}`}>
+              <div className={`grid gap-2 ${isMobile ? 'grid-cols-1' : isTablet ? 'grid-cols-2 gap-2' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4 lg:gap-6'}`}>
                 {filteredFoodItems.map((item) => (
                                       <Card key={item.id} className="overflow-hidden shadow-md hover:shadow-lg transition-shadow">
                       <div className="relative">
@@ -1742,7 +1742,7 @@ export default function Component() {
                           alt={item.name}
                           width={280}
                           height={180}
-                          className={`w-full object-cover ${isMobile ? 'h-24' : isTablet ? 'h-28' : 'h-24 sm:h-32 md:h-36 lg:h-44'}`}
+                          className={`w-full object-cover ${isMobile ? 'h-24' : isTablet ? 'h-24' : 'h-24 sm:h-32 md:h-36 lg:h-44'}`}
                         />
                         {item.badge && (
                           <Badge className="absolute top-1 sm:top-2 md:top-3 right-1 sm:right-2 md:right-3 bg-gray-800 text-white px-1 sm:px-2 py-0.5 sm:py-1 text-xs">
@@ -1768,15 +1768,15 @@ export default function Component() {
             </div>
 
             {/* Bottom Action Bar */}
-            <div className={`bg-white border-t border-gray-200 ${isMobile ? 'p-1 pb-12' : isTablet ? 'p-2 pb-16' : 'p-2 sm:p-3 md:p-4 lg:p-6'} flex items-end justify-end`}>
-              <div className={`flex ${isMobile ? 'gap-1' : isTablet ? 'gap-2' : 'gap-2 sm:gap-3 md:gap-4'}`}>
+            <div className={`bg-white border-t border-gray-200 ${isMobile ? 'p-1 pb-12' : isTablet ? 'p-1.5 pb-12' : 'p-2 sm:p-3 md:p-4 lg:p-6'} flex items-end justify-end`}>
+                              <div className={`flex ${isMobile ? 'gap-1' : isTablet ? 'gap-1.5' : 'gap-2 sm:gap-3 md:gap-4'}`}>
                 <Dialog open={showOrderHistory} onOpenChange={setShowOrderHistory}>
                   <DialogTrigger asChild>
                     <Button
                       variant="outline"
-                      className={`flex items-center gap-1 sm:gap-2 bg-white border-gray-300 text-gray-600 hover:bg-gray-50 ${isMobile ? 'px-2 py-1.5 text-xs' : isTablet ? 'px-3 py-2 text-sm' : 'px-2 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base'}`}
+                      className={`flex items-center gap-1 sm:gap-2 bg-white border-gray-300 text-gray-600 hover:bg-gray-50 ${isMobile ? 'px-2 py-1.5 text-xs' : isTablet ? 'px-2 py-1.5 text-xs' : 'px-2 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base'}`}
                     >
-                      <Menu className={`${isMobile ? 'w-3 h-3' : isTablet ? 'w-4 h-4' : 'w-3 sm:w-4 h-3 sm:h-4'}`} />
+                      <Menu className={`${isMobile ? 'w-3 h-3' : isTablet ? 'w-3 h-3' : 'w-3 sm:w-4 h-3 sm:h-4'}`} />
                       주문내역
                     </Button>
                   </DialogTrigger>
@@ -1822,12 +1822,12 @@ export default function Component() {
 
                 <AlertDialog open={showOrderConfirm} onOpenChange={setShowOrderConfirm}>
                   <AlertDialogTrigger asChild>
-                    <Button 
-                      className={`bg-cyan-400 hover:bg-cyan-500 text-black font-bold relative ${isMobile ? 'px-3 py-1.5 text-xs' : isTablet ? 'px-4 py-2 text-sm' : 'px-3 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base'}`}
-                      disabled={orderItems.length === 0}
-                    >
+                                      <Button 
+                    className={`bg-cyan-400 hover:bg-cyan-500 text-black font-bold relative ${isMobile ? 'px-3 py-1.5 text-xs' : isTablet ? 'px-3 py-1.5 text-xs' : 'px-3 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base'}`}
+                    disabled={orderItems.length === 0}
+                  >
                       주문하기
-                      <Badge className={`absolute -top-1 sm:-top-2 -right-1 sm:-right-2 bg-cyan-600 text-white rounded-full flex items-center justify-center text-xs font-bold ${isMobile ? 'w-4 h-4' : isTablet ? 'w-5 h-5' : 'w-4 sm:w-5 md:w-6 h-4 sm:h-5 md:h-6'}`}>
+                      <Badge className={`absolute -top-1 sm:-top-2 -right-1 sm:-right-2 bg-cyan-600 text-white rounded-full flex items-center justify-center text-xs font-bold ${isMobile ? 'w-4 h-4' : isTablet ? 'w-4 h-4' : 'w-4 sm:w-5 md:w-6 h-4 sm:h-5 md:h-6'}`}>
                         {getCartCount()}
                       </Badge>
                     </Button>
