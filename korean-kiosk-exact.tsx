@@ -32,6 +32,7 @@ interface FoodItem {
   priceNumber: number
   image: string
   category: string // 탭 카테고리 추가
+  description?: string // 메뉴 설명 추가
   badge?: string
 }
 
@@ -62,7 +63,8 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
       price: "0원",
       priceNumber: 0,
       image: "/placeholder.svg?height=180&width=280",
-      category: "메인메뉴"
+      category: "메인메뉴",
+      description: "맛있는 메뉴입니다"
     }
   ])
   const [editingMenu, setEditingMenu] = useState<FoodItem | null>(null)
@@ -71,6 +73,11 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
   const [tempMenuPrice, setTempMenuPrice] = useState("")
   const [tempMenuImage, setTempMenuImage] = useState("")
   const [tempMenuCategory, setTempMenuCategory] = useState("")
+  const [tempMenuDescription, setTempMenuDescription] = useState("")
+  
+  // 메뉴 상세 팝업 상태
+  const [showMenuDetail, setShowMenuDetail] = useState(false)
+  const [selectedMenuItem, setSelectedMenuItem] = useState<FoodItem | null>(null)
   const [isMobile, setIsMobile] = useState(false)
   const [isTablet, setIsTablet] = useState(false)
   const [isLandscape, setIsLandscape] = useState(false)
@@ -104,18 +111,22 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
   }
 
   useEffect(() => {
-    const hasTouchScreen = () => {
-      return 'ontouchstart' in window || navigator.maxTouchPoints > 0
-    }
-
     const checkDeviceType = () => {
-      const width = window.innerWidth
-      const height = window.innerHeight
-      const isTouch = hasTouchScreen()
-      
-      setIsMobile(width < 768)
-      setIsTablet(width >= 768 && isTouch) // 터치 스크린이 있으면 태블릿
-      setIsLandscape(width > height) // 가로가 세로보다 길면 랜드스케이프
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const ua = navigator.userAgent.toLowerCase();
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+      const isMobileUA = /iphone|ipod|android.*mobile|windows phone/.test(ua);
+      const isTabletUA = /ipad|android(?!.*mobile)|tablet/.test(ua);
+
+      const isMobile = isMobileUA || (width < 768 && isTouchDevice);
+      const isTablet = isTabletUA || (width >= 768 && width <= 1400 && isTouchDevice);
+      const isLandscape = width > height;
+
+      setIsMobile(isMobile);
+      setIsTablet(isTablet);
+      setIsLandscape(isLandscape);
     }
     
     checkDeviceType()
@@ -156,6 +167,11 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
     return orderItems.reduce((total, item) => total + item.quantity, 0)
   }
 
+  const handleShowMenuDetail = (item: FoodItem) => {
+    setSelectedMenuItem(item)
+    setShowMenuDetail(true)
+  }
+
   const handleAddToCart = (item: FoodItem) => {
     setOrderItems((prev) => {
       const existingItem = prev.find(orderItem => orderItem.id === item.id)
@@ -175,6 +191,7 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
         }]
       }
     })
+    setShowMenuDetail(false) // 팝업에서 담기 후 팝업 닫기
   }
 
   const handleRemoveFromCart = (itemId: number) => {
@@ -283,6 +300,7 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
     setTempMenuPrice(menu.priceNumber.toString())
     setTempMenuImage(menu.image)
     setTempMenuCategory(menu.category)
+    setTempMenuDescription(menu.description || "")
     setShowMenuEdit(true)
   }
 
@@ -302,7 +320,8 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
       price: `${priceNumber.toLocaleString()}원`,
       priceNumber: priceNumber,
       image: tempMenuImage || "/placeholder.svg?height=180&width=280",
-      category: tempMenuCategory || tabs[0]
+      category: tempMenuCategory || tabs[0],
+      description: tempMenuDescription || ""
     }
     
     setFoodItems(prev => 
@@ -329,6 +348,7 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
     setTempMenuPrice("")
     setTempMenuImage("")
     setTempMenuCategory("")
+    setTempMenuDescription("")
   }
 
   // 네이버 지도 검색 함수
@@ -1782,18 +1802,20 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
           </Button>
 
           {/* Left Sidebar */}
-          <div className={`${isMobile && !isLandscape ? 'w-32' : isMobile && isLandscape ? 'w-28' : isTablet ? 'w-36' : 'w-20 sm:w-24 md:w-32 lg:w-36'} bg-gray-800 text-white flex flex-col relative`}>
+          <div className={`${isMobile && !isLandscape ? 'w-40' : isMobile && isLandscape ? 'w-36' : isTablet ? 'w-44' : 'w-24 sm:w-32 md:w-40 lg:w-44'} bg-gray-800 text-white flex flex-col relative`}>
             <div className={`text-center bg-[rgba(34,34,34,1)] ${isMobile && !isLandscape ? 'p-3' : isMobile && isLandscape ? 'p-2' : isTablet ? 'p-3' : 'p-2 sm:p-3 md:p-4'}`}>
-              <div className={`bg-white text-black rounded-lg sm:rounded-xl font-bold leading-tight text-center tracking-wide ml-px mr-0.5 ${isMobile && !isLandscape ? 'text-lg py-3 mb-3 mt-3 px-3' : isMobile && isLandscape ? 'text-base py-2 mb-2 mt-2 px-2' : isTablet ? 'text-xl py-3 mb-3 mt-3 px-3' : 'text-sm sm:text-lg md:text-2xl lg:text-3xl py-2 sm:py-3 md:py-4 mb-2 sm:mb-3 md:mb-4 mt-2 sm:mt-3 md:mt-4 leading-4 sm:leading-6 md:leading-8 px-2 sm:px-3 md:px-4'}`}>
+              <div className={`bg-white text-black rounded-lg sm:rounded-xl font-bold leading-tight text-center tracking-wide aspect-square flex items-center justify-center ${isMobile && !isLandscape ? 'text-3xl p-3 m-1' : isMobile && isLandscape ? 'text-2xl p-2 m-1' : isTablet ? 'text-4xl p-3 m-1' : 'text-xl sm:text-2xl md:text-3xl lg:text-4xl p-2 sm:p-3 md:p-4 m-1'}`}>
                 하이
                 <br />
                 오더
               </div>
-              <div className={`text-white font-bold whitespace-pre-wrap text-center leading-tight ${isMobile && !isLandscape ? 'mb-4 text-sm' : isMobile && isLandscape ? 'mb-2 text-xs' : isTablet ? 'mb-4 text-base' : 'mb-3 sm:mb-4 md:mb-6'} ${!isMobile && !isTablet ? getStoreNameFontSize() : ''}`}>{storeName}</div>
             </div>
 
             <div className="flex-1 px-0 mx-0 tracking-normal leading-7 border-0 bg-[rgba(34,34,34,1)] flex flex-col">
-              <div className={`flex items-center ${isMobile && !isLandscape ? 'px-3 py-3 mx-1' : isMobile && isLandscape ? 'px-2 py-2 mx-1' : isTablet ? 'px-3 py-3 mx-1' : 'px-2 sm:px-3 md:px-4 py-2 sm:py-3 mx-1 sm:mx-2'} border-l-4 border-cyan-400 rounded-r bg-[rgba(61,61,61,1)]`}>
+              {/* 식당명 */}
+              <div className={`text-white font-bold whitespace-pre-wrap text-center leading-tight ${isMobile && !isLandscape ? 'mt-4 mb-4 text-lg px-3' : isMobile && isLandscape ? 'mt-3 mb-3 text-base px-2' : isTablet ? 'mt-4 mb-4 text-xl px-3' : 'mt-4 mb-4 text-base sm:text-lg md:text-xl lg:text-2xl px-2 sm:px-3 md:px-4'}`}>{storeName}</div>
+              
+              <div className={`flex items-center justify-center ${isMobile && !isLandscape ? 'px-3 py-3 mx-1' : isMobile && isLandscape ? 'px-2 py-2 mx-1' : isTablet ? 'px-3 py-3 mx-1' : 'px-2 sm:px-3 md:px-4 py-2 sm:py-3 mx-1 sm:mx-2'} border-l-4 border-cyan-400 rounded-r bg-[rgba(61,61,61,1)]`}>
                 <img src="https://cdn-icons-png.flaticon.com/256/192/192732.png" className={`${isMobile && !isLandscape ? 'mr-2 w-5 h-5' : isMobile && isLandscape ? 'mr-1 w-4 h-4' : isTablet ? 'mr-2 w-5 h-5' : 'mr-1 sm:mr-2 w-3 sm:w-4 md:w-5 lg:w-6 h-3 sm:h-4 md:h-5 lg:h-6'} brightness-0 invert`} alt="메뉴주문" />
                 <span className={`${isMobile && !isLandscape ? 'text-sm' : isMobile && isLandscape ? 'text-xs' : isTablet ? 'text-base' : 'text-xs sm:text-sm md:text-base'} tracking-normal font-extrabold leading-6 sm:leading-8 md:leading-10`} style={{ whiteSpace: 'nowrap' }}>메뉴주문</span>
               </div>
@@ -1848,14 +1870,14 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
               }}>
                 <div className={`grid ${isMobile && !isLandscape ? 'grid-cols-3 gap-3' : isMobile && isLandscape ? 'grid-cols-3 gap-3' : isTablet ? 'grid-cols-3 gap-4' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4 lg:gap-6'}`}>
                   {filteredFoodItems.map((item) => (
-                    <Card key={item.id} className={`overflow-hidden shadow-md hover:shadow-lg transition-shadow ${isMobile && !isLandscape ? 'h-56' : isMobile && isLandscape ? 'h-44' : isTablet ? 'h-60' : 'h-52 sm:h-56 md:h-60 lg:h-64'}`}>
+                    <Card key={item.id} className={`overflow-hidden shadow-md hover:shadow-lg transition-shadow ${isMobile && !isLandscape ? 'h-56' : isMobile && isLandscape ? 'h-44' : isTablet ? 'h-68' : 'h-52 sm:h-56 md:h-60 lg:h-64'}`}>
                       <div className="relative">
                         <Image
                           src={item.image || "/placeholder.svg"}
                           alt={item.name}
                           width={280}
                           height={180}
-                          className={`w-full object-cover ${isMobile && !isLandscape ? 'h-32' : isMobile && isLandscape ? 'h-28' : isTablet ? 'h-36' : 'h-28 sm:h-32 md:h-36 lg:h-40'}`}
+                          className={`w-full object-cover ${isMobile && !isLandscape ? 'h-32' : isMobile && isLandscape ? 'h-28' : isTablet ? 'h-40' : 'h-28 sm:h-32 md:h-36 lg:h-40'}`}
                         />
                         {item.badge && (
                           <Badge className="absolute top-1 sm:top-2 md:top-3 right-1 sm:right-2 md:right-3 bg-gray-800 text-white px-1 sm:px-2 py-0.5 sm:py-1 text-xs">
@@ -1863,14 +1885,14 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
                           </Badge>
                         )}
                       </div>
-                      <CardContent className={`${isMobile && !isLandscape ? 'p-3 pb-12 h-auto min-h-28' : isMobile && isLandscape ? 'p-3 pb-10 h-auto min-h-20' : isTablet ? 'p-4 pb-12 h-auto min-h-28' : 'p-2 sm:p-3 md:p-4 pb-10 sm:pb-12 md:pb-14 h-auto min-h-24'} flex flex-col justify-between`}>
+                      <CardContent className={`${isMobile && !isLandscape ? 'p-3 pb-12 h-auto min-h-28' : isMobile && isLandscape ? 'p-3 pb-10 h-auto min-h-20' : isTablet ? 'p-4 pb-4 h-auto min-h-24' : 'p-2 sm:p-3 md:p-4 pb-10 sm:pb-12 md:pb-14 h-auto min-h-24'} flex flex-col justify-between`}>
                         <h3 className={`font-medium ${isMobile && !isLandscape ? 'text-base mb-1' : isMobile && isLandscape ? 'text-base mb-1' : isTablet ? 'text-base mb-1' : 'text-base sm:text-base md:text-lg mb-1'} leading-tight text-gray-900`}>
                           {item.name}
                         </h3>
-                        <div className="flex items-center justify-between mt-auto mb-4">
+                        <div className="flex items-center justify-between mt-auto">
                           <span className={`font-bold ${isMobile && !isLandscape ? 'text-base' : isMobile && isLandscape ? 'text-base' : isTablet ? 'text-base' : 'text-base sm:text-base md:text-lg'}`}>{item.price}</span>
                           <Button
-                            onClick={() => handleAddToCart(item)}
+                            onClick={() => handleShowMenuDetail(item)}
                             className={`bg-gray-800 hover:bg-gray-700 text-white font-medium ${isMobile && !isLandscape ? 'px-3 py-1.5 text-sm' : isMobile && isLandscape ? 'px-3 py-1 text-sm' : isTablet ? 'px-4 py-2 text-base' : 'px-2 sm:px-3 md:px-4 lg:px-6 py-1 sm:py-1.5 md:py-2 text-xs sm:text-sm md:text-base'}`}
                           >
                             담기
@@ -1980,6 +2002,48 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
               </div>
             </div>
           </div>
+
+          {/* Menu Detail Dialog */}
+          <Dialog open={showMenuDetail} onOpenChange={setShowMenuDetail}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-bold">{selectedMenuItem?.name}</DialogTitle>
+              </DialogHeader>
+              <div className="mt-4">
+                {selectedMenuItem && (
+                  <div className="space-y-4">
+                    <div className="w-full h-48 bg-gray-100 rounded-lg overflow-hidden">
+                      <img
+                        src={selectedMenuItem.image}
+                        alt={selectedMenuItem.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="space-y-3">
+                      <h3 className="text-lg font-bold">{selectedMenuItem.name}</h3>
+                      <p className="text-gray-600">{selectedMenuItem.description || "맛있는 메뉴입니다."}</p>
+                      <div className="text-2xl font-bold text-gray-900">{selectedMenuItem.price}</div>
+                    </div>
+                    <div className="flex gap-2 pt-4">
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowMenuDetail(false)}
+                        className="flex-1"
+                      >
+                        취소
+                      </Button>
+                      <Button
+                        onClick={() => handleAddToCart(selectedMenuItem)}
+                        className="flex-1 bg-gray-800 hover:bg-gray-700 text-white"
+                      >
+                        담기
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
 
           {/* Store Settings Dialog */}
           <Dialog open={showStoreSettings} onOpenChange={setShowStoreSettings}>
@@ -2304,6 +2368,19 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
                     onChange={(e) => setTempMenuImage(e.target.value)}
                     placeholder="이미지 URL을 입력하세요"
                     className="w-full"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="menuDescription" className="text-sm font-medium">
+                    메뉴 설명
+                  </Label>
+                  <Textarea
+                    id="menuDescription"
+                    value={tempMenuDescription}
+                    onChange={(e) => setTempMenuDescription(e.target.value)}
+                    placeholder="메뉴 설명을 입력하세요"
+                    className="w-full resize-none"
+                    rows={3}
                   />
                 </div>
                 <div className="flex gap-2 pt-4">
