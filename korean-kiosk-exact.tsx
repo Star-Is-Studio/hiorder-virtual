@@ -108,7 +108,7 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
       const width = window.innerWidth
       const height = window.innerHeight
       setIsMobile(width < 768)
-      setIsTablet(width >= 768 && width <= 1024)
+      setIsTablet(width >= 768 && width <= 780) // 11인치 이하를 태블릿으로 설정
       setIsLandscape(width > height) // 가로가 세로보다 길면 랜드스케이프
     }
     
@@ -1847,12 +1847,10 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
                           </Badge>
                         )}
                       </div>
-                      <CardContent className={`${isMobile && !isLandscape ? 'p-3 pb-10 h-20' : isMobile && isLandscape ? 'p-3 pb-8 h-20' : isTablet ? 'p-4 pb-10 h-20' : 'p-2 sm:p-3 md:p-4 pb-8 sm:pb-10 md:pb-12 h-20'} flex flex-col justify-between`}>
-                        <h3 className={`font-medium ${isMobile && !isLandscape ? 'text-sm mb-2' : isMobile && isLandscape ? 'text-sm mb-1' : isTablet ? 'text-base mb-2' : 'text-sm sm:text-base md:text-lg mb-2'} overflow-hidden`} style={{ 
-                          display: '-webkit-box', 
-                          WebkitLineClamp: 2, 
-                          WebkitBoxOrient: 'vertical' as any
-                        }}>{item.name}</h3>
+                      <CardContent className={`${isMobile && !isLandscape ? 'p-3 pb-8 h-auto min-h-20' : isMobile && isLandscape ? 'p-3 pb-6 h-auto min-h-16' : isTablet ? 'p-4 pb-8 h-auto min-h-20' : 'p-2 sm:p-3 md:p-4 pb-8 sm:pb-10 md:pb-12 h-auto min-h-20'} flex flex-col justify-between`}>
+                        <h3 className={`font-medium ${isMobile && !isLandscape ? 'text-sm mb-2' : isMobile && isLandscape ? 'text-sm mb-1' : isTablet ? 'text-base mb-2' : 'text-sm sm:text-base md:text-lg mb-2'} leading-tight text-gray-900`}>
+                          {item.name}
+                        </h3>
                         <div className="flex items-center justify-between mt-auto mb-3">
                           <span className={`font-bold ${isMobile && !isLandscape ? 'text-sm' : isMobile && isLandscape ? 'text-sm' : isTablet ? 'text-base' : 'text-sm sm:text-base md:text-lg'}`}>{item.price}</span>
                           <Button
