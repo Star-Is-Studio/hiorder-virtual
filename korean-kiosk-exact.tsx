@@ -1823,16 +1823,16 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
 
               <div className={`flex-1 overflow-y-auto`} style={{ 
                 maxHeight: isMobile && !isLandscape 
-                  ? 'calc(100vh - 130px)' // 모바일 세로: 버튼이 작아진만큼 더 넓게
+                  ? 'calc(100vh - 125px)' // 모바일 세로: 메뉴 카드가 커진만큼 더 넓게
                   : isMobile && isLandscape 
-                  ? 'calc(100vh - 100px)' // 모바일 가로: 더 넓게
+                  ? 'calc(100vh - 95px)' // 모바일 가로: 더 넓게
                   : isTablet 
-                  ? 'calc(100vh - 135px)' // 태블릿: 더 넓게
-                  : 'calc(100vh - 200px)' // 데스크톱: 기존 유지
+                  ? 'calc(100vh - 130px)' // 태블릿: 더 넓게
+                  : 'calc(100vh - 195px)' // 데스크톱: 약간 더 넓게
               }}>
                 <div className={`grid ${isMobile && !isLandscape ? 'grid-cols-3 gap-3' : isMobile && isLandscape ? 'grid-cols-3 gap-3' : isTablet ? 'grid-cols-3 gap-4' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4 lg:gap-6'}`}>
                   {filteredFoodItems.map((item) => (
-                    <Card key={item.id} className={`overflow-hidden shadow-md hover:shadow-lg transition-shadow ${isMobile && !isLandscape ? 'h-52' : isMobile && isLandscape ? 'h-48' : isTablet ? 'h-56' : 'h-50 sm:h-52 md:h-56 lg:h-60'}`}>
+                    <Card key={item.id} className={`overflow-hidden shadow-md hover:shadow-lg transition-shadow ${isMobile && !isLandscape ? 'h-60' : isMobile && isLandscape ? 'h-52' : isTablet ? 'h-64' : 'h-56 sm:h-60 md:h-64 lg:h-68'}`}>
                       <div className="relative">
                         <Image
                           src={item.image || "/placeholder.svg"}
@@ -1847,11 +1847,11 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
                           </Badge>
                         )}
                       </div>
-                      <CardContent className={`${isMobile && !isLandscape ? 'p-3 pb-8 h-auto min-h-20' : isMobile && isLandscape ? 'p-3 pb-6 h-auto min-h-16' : isTablet ? 'p-4 pb-8 h-auto min-h-20' : 'p-2 sm:p-3 md:p-4 pb-8 sm:pb-10 md:pb-12 h-auto min-h-20'} flex flex-col justify-between`}>
-                        <h3 className={`font-medium ${isMobile && !isLandscape ? 'text-sm mb-2' : isMobile && isLandscape ? 'text-sm mb-1' : isTablet ? 'text-base mb-2' : 'text-sm sm:text-base md:text-lg mb-2'} leading-tight text-gray-900`}>
+                      <CardContent className={`${isMobile && !isLandscape ? 'p-3 pb-8 h-auto min-h-28' : isMobile && isLandscape ? 'p-3 pb-6 h-auto min-h-20' : isTablet ? 'p-4 pb-8 h-auto min-h-28' : 'p-2 sm:p-3 md:p-4 pb-8 sm:pb-10 md:pb-12 h-auto min-h-24'} flex flex-col justify-between`}>
+                        <h3 className={`font-medium ${isMobile && !isLandscape ? 'text-sm mb-3' : isMobile && isLandscape ? 'text-sm mb-2' : isTablet ? 'text-base mb-3' : 'text-sm sm:text-base md:text-lg mb-3'} leading-tight text-gray-900`}>
                           {item.name}
                         </h3>
-                        <div className="flex items-center justify-between mt-auto mb-3">
+                        <div className="flex items-center justify-between mt-auto mb-2">
                           <span className={`font-bold ${isMobile && !isLandscape ? 'text-sm' : isMobile && isLandscape ? 'text-sm' : isTablet ? 'text-base' : 'text-sm sm:text-base md:text-lg'}`}>{item.price}</span>
                           <Button
                             onClick={() => handleAddToCart(item)}
