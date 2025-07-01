@@ -1832,7 +1832,7 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
               }}>
                 <div className={`grid ${isMobile && !isLandscape ? 'grid-cols-3 gap-3' : isMobile && isLandscape ? 'grid-cols-3 gap-3' : isTablet ? 'grid-cols-3 gap-4' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4 lg:gap-6'}`}>
                   {filteredFoodItems.map((item) => (
-                    <Card key={item.id} className={`overflow-hidden shadow-md hover:shadow-lg transition-shadow ${isMobile && !isLandscape ? 'h-60' : isMobile && isLandscape ? 'h-52' : isTablet ? 'h-64' : 'h-56 sm:h-60 md:h-64 lg:h-68'}`}>
+                    <Card key={item.id} className={`overflow-hidden shadow-md hover:shadow-lg transition-shadow ${isMobile && !isLandscape ? 'h-68' : isMobile && isLandscape ? 'h-56' : isTablet ? 'h-72' : 'h-64 sm:h-68 md:h-72 lg:h-76'}`}>
                       <div className="relative">
                         <Image
                           src={item.image || "/placeholder.svg"}
@@ -1847,7 +1847,7 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
                           </Badge>
                         )}
                       </div>
-                      <CardContent className={`${isMobile && !isLandscape ? 'p-3 pb-8 h-auto min-h-28' : isMobile && isLandscape ? 'p-3 pb-6 h-auto min-h-20' : isTablet ? 'p-4 pb-8 h-auto min-h-28' : 'p-2 sm:p-3 md:p-4 pb-8 sm:pb-10 md:pb-12 h-auto min-h-24'} flex flex-col justify-between`}>
+                      <CardContent className={`${isMobile && !isLandscape ? 'p-3 pb-12 h-auto min-h-28' : isMobile && isLandscape ? 'p-3 pb-10 h-auto min-h-20' : isTablet ? 'p-4 pb-12 h-auto min-h-28' : 'p-2 sm:p-3 md:p-4 pb-10 sm:pb-12 md:pb-14 h-auto min-h-24'} flex flex-col justify-between`}>
                         <h3 className={`font-medium ${isMobile && !isLandscape ? 'text-sm mb-3' : isMobile && isLandscape ? 'text-sm mb-2' : isTablet ? 'text-base mb-3' : 'text-sm sm:text-base md:text-lg mb-3'} leading-tight text-gray-900`}>
                           {item.name}
                         </h3>
