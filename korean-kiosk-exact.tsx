@@ -104,11 +104,17 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
   }
 
   useEffect(() => {
+    const hasTouchScreen = () => {
+      return 'ontouchstart' in window || navigator.maxTouchPoints > 0
+    }
+
     const checkDeviceType = () => {
       const width = window.innerWidth
       const height = window.innerHeight
+      const isTouch = hasTouchScreen()
+      
       setIsMobile(width < 768)
-      setIsTablet(width >= 768 && width <= 1400) // iPad Pro 1366px 포함하여 태블릿 범위 확장
+      setIsTablet(width >= 768 && isTouch) // 터치 스크린이 있으면 태블릿
       setIsLandscape(width > height) // 가로가 세로보다 길면 랜드스케이프
     }
     
