@@ -108,7 +108,7 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
       const width = window.innerWidth
       const height = window.innerHeight
       setIsMobile(width < 768)
-      setIsTablet(width >= 768 && width <= 780) // 11인치 이하를 태블릿으로 설정
+      setIsTablet(width >= 768 && width <= 1400) // iPad Pro 1366px 포함하여 태블릿 범위 확장
       setIsLandscape(width > height) // 가로가 세로보다 길면 랜드스케이프
     }
     
@@ -848,12 +848,12 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
         .menu-scroll-container {
             flex: 1;
             overflow-y: auto;
-            max-height: 200px;
+            max-height: 400px;
             height: calc(100% - 160px);
         }
         @media (min-width: 768px) {
             .menu-scroll-container {
-                max-height: 300px;
+                max-height: 500px;
             }
         }
         @media (min-width: 640px) {
@@ -918,23 +918,23 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
             transition: box-shadow 0.2s;
             border-radius: 8px;
             background: white;
-            height: 180px;
+            height: 450px;
             display: flex;
             flex-direction: column;
         }
         @media (min-width: 640px) {
             .menu-card {
-                height: 220px;
+                height: 500px;
             }
         }
         @media (min-width: 768px) {
             .menu-card {
-                height: 240px;
+                height: 550px;
             }
         }
         @media (min-width: 1024px) {
             .menu-card {
-                height: 280px;
+                height: 600px;
             }
         }
         .menu-card:hover {
@@ -945,22 +945,22 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
         }
         .menu-image {
             width: 100%;
-            height: 96px;
+            height: 170px;
             object-fit: cover;
         }
         @media (min-width: 640px) {
             .menu-image {
-                height: 128px;
+                height: 200px;
             }
         }
         @media (min-width: 768px) {
             .menu-image {
-                height: 144px;
+                height: 220px;
             }
         }
         @media (min-width: 1024px) {
             .menu-image {
-                height: 176px;
+                height: 240px;
             }
         }
         .badge {
@@ -987,8 +987,9 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
         }
         .menu-info {
             padding: 8px;
-            padding-bottom: 20px;
+            padding-bottom: 14px;
             flex: 1;
+            min-height: 120px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -996,11 +997,20 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
         @media (min-width: 640px) {
             .menu-info {
                 padding: 12px;
+                padding-bottom: 14px;
+                min-height: 140px;
             }
         }
         @media (min-width: 768px) {
             .menu-info {
                 padding: 16px;
+                padding-bottom: 18px;
+                min-height: 140px;
+            }
+        }
+        @media (min-width: 1024px) {
+            .menu-info {
+                min-height: 160px;
             }
         }
         .menu-name {
@@ -1832,7 +1842,7 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
               }}>
                 <div className={`grid ${isMobile && !isLandscape ? 'grid-cols-3 gap-3' : isMobile && isLandscape ? 'grid-cols-3 gap-3' : isTablet ? 'grid-cols-3 gap-4' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4 lg:gap-6'}`}>
                   {filteredFoodItems.map((item) => (
-                    <Card key={item.id} className={`overflow-hidden shadow-md hover:shadow-lg transition-shadow ${isMobile && !isLandscape ? 'h-68' : isMobile && isLandscape ? 'h-56' : isTablet ? 'h-72' : 'h-64 sm:h-68 md:h-72 lg:h-76'}`}>
+                    <Card key={item.id} className={`overflow-hidden shadow-md hover:shadow-lg transition-shadow ${isMobile && !isLandscape ? 'h-56' : isMobile && isLandscape ? 'h-44' : isTablet ? 'h-60' : 'h-52 sm:h-56 md:h-60 lg:h-64'}`}>
                       <div className="relative">
                         <Image
                           src={item.image || "/placeholder.svg"}
@@ -1848,11 +1858,11 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
                         )}
                       </div>
                       <CardContent className={`${isMobile && !isLandscape ? 'p-3 pb-12 h-auto min-h-28' : isMobile && isLandscape ? 'p-3 pb-10 h-auto min-h-20' : isTablet ? 'p-4 pb-12 h-auto min-h-28' : 'p-2 sm:p-3 md:p-4 pb-10 sm:pb-12 md:pb-14 h-auto min-h-24'} flex flex-col justify-between`}>
-                        <h3 className={`font-medium ${isMobile && !isLandscape ? 'text-sm mb-3' : isMobile && isLandscape ? 'text-sm mb-2' : isTablet ? 'text-base mb-3' : 'text-sm sm:text-base md:text-lg mb-3'} leading-tight text-gray-900`}>
+                        <h3 className={`font-medium ${isMobile && !isLandscape ? 'text-base mb-1' : isMobile && isLandscape ? 'text-base mb-1' : isTablet ? 'text-base mb-1' : 'text-base sm:text-base md:text-lg mb-1'} leading-tight text-gray-900`}>
                           {item.name}
                         </h3>
-                        <div className="flex items-center justify-between mt-auto mb-2">
-                          <span className={`font-bold ${isMobile && !isLandscape ? 'text-sm' : isMobile && isLandscape ? 'text-sm' : isTablet ? 'text-base' : 'text-sm sm:text-base md:text-lg'}`}>{item.price}</span>
+                        <div className="flex items-center justify-between mt-auto mb-4">
+                          <span className={`font-bold ${isMobile && !isLandscape ? 'text-base' : isMobile && isLandscape ? 'text-base' : isTablet ? 'text-base' : 'text-base sm:text-base md:text-lg'}`}>{item.price}</span>
                           <Button
                             onClick={() => handleAddToCart(item)}
                             className={`bg-gray-800 hover:bg-gray-700 text-white font-medium ${isMobile && !isLandscape ? 'px-3 py-1.5 text-sm' : isMobile && isLandscape ? 'px-3 py-1 text-sm' : isTablet ? 'px-4 py-2 text-base' : 'px-2 sm:px-3 md:px-4 lg:px-6 py-1 sm:py-1.5 md:py-2 text-xs sm:text-sm md:text-base'}`}
