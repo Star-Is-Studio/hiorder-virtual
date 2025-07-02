@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction, AlertDialogTrigger } from "@/components/ui/alert-dialog"
-import { ConciergeBellIcon, Menu, X, Settings, Plus, Edit, Trash2, MapPin, Download } from "lucide-react"
+import { ConciergeBellIcon, Menu, X, Settings, Plus, Edit, Trash2, MapPin, Download, RefreshCw } from "lucide-react"
 import Image from "next/image"
 import { supabase, MenuBoard } from "@/lib/supabase"
 
@@ -86,6 +86,9 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
   const [savedMenuBoards, setSavedMenuBoards] = useState<any[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [showImportModal, setShowImportModal] = useState(false)
+  const [importPlaceId, setImportPlaceId] = useState("")
+  const [isImporting, setIsImporting] = useState(false)
 
   // 매장명 길이에 따른 글씨 크기 계산 함수 추가
   const getStoreNameFontSize = () => {
@@ -109,6 +112,40 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
       return 'text-xs sm:text-sm md:text-lg lg:text-2xl'
     }
   }
+
+  // 메뉴 이름 길이에 따른 글씨 크기 계산 함수 추가
+  const getMenuNameFontSize = (name: string) => {
+    const nameLength = name.length;
+    
+    // 모바일 세로모드
+    if (isMobile && !isLandscape) {
+      if (nameLength > 20) return 'text-sm leading-snug';
+      if (nameLength > 15) return 'text-sm leading-normal';
+      if (nameLength > 10) return 'text-base leading-normal';
+      return 'text-base leading-relaxed';
+    } 
+    // 모바일 가로모드
+    else if (isMobile && isLandscape) {
+      if (nameLength > 18) return 'text-sm leading-snug';
+      if (nameLength > 13) return 'text-sm leading-normal';
+      if (nameLength > 8) return 'text-base leading-normal';
+      return 'text-base leading-relaxed';
+    } 
+    // 태블릿
+    else if (isTablet) {
+      if (nameLength > 25) return 'text-base leading-snug';
+      if (nameLength > 20) return 'text-base leading-normal';
+      if (nameLength > 15) return 'text-lg leading-normal';
+      return 'text-lg leading-relaxed';
+    } 
+    // 데스크톱
+    else {
+      if (nameLength > 22) return 'text-sm leading-snug';
+      if (nameLength > 17) return 'text-base leading-normal';
+      if (nameLength > 12) return 'text-base leading-relaxed';
+      return 'text-lg leading-relaxed';
+    }
+  };
 
   useEffect(() => {
     const checkDeviceType = () => {
@@ -297,7 +334,7 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
   const handleEditMenu = (menu: FoodItem) => {
     setEditingMenu(menu)
     setTempMenuName(menu.name)
-    setTempMenuPrice(menu.priceNumber.toString())
+    setTempMenuPrice(menu.priceNumber ? menu.priceNumber.toString() : '0')
     setTempMenuImage(menu.image)
     setTempMenuCategory(menu.category)
     setTempMenuDescription(menu.description || "")
@@ -363,11 +400,62 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
   }
 
   // HTML 다운로드 함수
+  const handleDownloadHTML = () => {
+    setShowImportModal(true)
+  }
+
+  const handleImportMenu = async () => {
+    if (!importPlaceId) {
+      alert('매장 ID를 입력해주세요.');
+      return;
+    }
+
+    setIsImporting(true);
+    try {
+      const response = await fetch('/api/naver-menu', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ placeId: importPlaceId }),
+      });
+
+      if (!response.ok) {
+        throw new Error('메뉴 정보를 가져오는데 실패했습니다.');
+      }
+
+      const data = await response.json();
+      
+      // 새로운 메뉴 추가 (메인메뉴 탭에 추가)
+      const newMenus = data.items.map((item: FoodItem) => {
+        // 가격에서 숫자만 추출
+        const priceNumber = parseInt(item.price.replace(/[^0-9]/g, '')) || 0;
+        return {
+          ...item,
+          id: Math.max(...foodItems.map((item: FoodItem) => item.id), 0) + 1 + data.items.indexOf(item),
+          category: "메인메뉴", // 메인메뉴 탭에 강제로 추가
+          price: `${priceNumber.toLocaleString()}원`,
+          priceNumber: priceNumber
+        };
+      });
+
+      setFoodItems(prev => [...prev, ...newMenus]);
+      setShowImportModal(false);
+      setImportPlaceId("");
+      alert(`${newMenus.length}개의 메뉴를 메인메뉴 탭에 추가했습니다!`);
+    } catch (error) {
+      console.error('Error:', error);
+      alert('메뉴 정보를 가져오는데 실패했습니다. 올바른 매장 ID인지 확인해주세요.');
+    } finally {
+      setIsImporting(false);
+    }
+  }
+
   // 현재 상태 저장
   const handleSaveCurrentState = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const boardName = `${storeName} ${storeAddress}`.trim() || '이름없는 메뉴판'
+      const boardName = `${storeName} ${storeAddress}`.trim() || '이름없는 메뉴판';
       
       // Supabase에 저장
       const menuBoard: MenuBoard = {
@@ -376,39 +464,39 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
         store_address: storeAddress,
         tabs,
         food_items: foodItems
-      }
+      };
       
       // 같은 이름이 있는지 확인
       const { data: existing } = await supabase
         .from('menu_boards')
         .select('id')
         .eq('name', boardName)
-        .single()
+        .single();
       
       if (existing) {
         // 업데이트
         const { error } = await supabase
           .from('menu_boards')
           .update(menuBoard)
-          .eq('id', existing.id)
+          .eq('id', existing.id);
         
-        if (error) throw error
+        if (error) throw error;
       } else {
         // 새로 추가
         const { error } = await supabase
           .from('menu_boards')
-          .insert([menuBoard])
+          .insert([menuBoard]);
         
-        if (error) throw error
+        if (error) throw error;
       }
       
-      await loadSavedMenuBoards()
-      alert('메뉴판이 저장되었습니다!')
+      await loadSavedMenuBoards();
+      alert('메뉴판이 저장되었습니다!');
     } catch (error) {
-      console.error('저장 실패:', error)
-      alert('저장에 실패했습니다: ' + (error as Error).message)
+      console.error('저장 실패:', error);
+      alert('저장에 실패했습니다: ' + (error as Error).message);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
@@ -471,1259 +559,22 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
            storeAddress.toLowerCase().includes(searchQuery.toLowerCase())
   })
 
-  const handleDownloadHTML = () => {
-    const currentDate = new Date().toISOString().split('T')[0]
-    
-    const htmlContent = `<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>토탈프로 시뮬레이터 - ${storeName}</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-            background: rgb(229, 231, 235);
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 8px;
-            overflow: hidden;
-        }
-        @media (min-width: 640px) {
-            body { padding: 16px; }
-        }
-        @media (min-width: 768px) {
-            body { padding: 32px; }
-        }
-        @media (min-width: 1024px) {
-            body { padding: 10%; }
-        }
-        .kiosk-container {
-            background: rgb(31, 41, 55);
-            border-radius: 12px;
-            padding: 4px 8px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            aspect-ratio: 9/16;
-            width: 98vw;
-            height: 98vh;
-            min-height: 98vh;
-            max-height: 98vh;
-        }
-        @media (min-width: 768px) {
-            .kiosk-container {
-                border-radius: 20px;
-                padding: 16px 20px;
-                aspect-ratio: 4/3;
-                width: 100%;
-                height: 90vh;
-                min-height: 90vh;
-                max-width: min(90vw, 90vh * 4/3);
-                max-height: 90vh;
-            }
-        }
-        @media (min-width: 1024px) {
-            .kiosk-container {
-                border-radius: 24px;
-                padding: 16px 20px;
-            }
-        }
-        .kiosk-content {
-            width: 100%;
-            height: 100%;
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            display: flex;
-            position: relative;
-        }
-        .sidebar {
-            width: 80px;
-            min-width: 80px;
-            background: rgb(31, 41, 55);
-            color: white;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-        @media (min-width: 640px) {
-            .sidebar {
-                width: 96px;
-                min-width: 96px;
-            }
-        }
-        @media (min-width: 768px) {
-            .sidebar {
-                width: 128px;
-                min-width: 128px;
-            }
-        }
-        @media (min-width: 1024px) {
-            .sidebar {
-                width: 144px;
-                min-width: 144px;
-            }
-        }
-        .logo-section {
-            padding: 8px;
-            text-align: center;
-            background: rgba(34, 34, 34, 1);
-        }
-        @media (min-width: 640px) {
-            .logo-section { padding: 12px; }
-        }
-        @media (min-width: 768px) {
-            .logo-section { padding: 16px; }
-        }
-        .logo {
-            background: white;
-            color: black;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 14px;
-            line-height: 16px;
-            text-align: center;
-            letter-spacing: 0.025em;
-            padding: 8px;
-            margin-bottom: 8px;
-            margin-top: 8px;
-            margin-left: 1px;
-            margin-right: 2px;
-        }
-        @media (min-width: 640px) {
-            .logo {
-                border-radius: 10px;
-                font-size: 18px;
-                line-height: 20px;
-                padding: 12px;
-                margin-bottom: 12px;
-                margin-top: 12px;
-            }
-        }
-        @media (min-width: 768px) {
-            .logo {
-                border-radius: 12px;
-                font-size: 24px;
-                line-height: 26px;
-                padding: 16px;
-                margin-bottom: 16px;
-                margin-top: 16px;
-            }
-        }
-        @media (min-width: 1024px) {
-            .logo {
-                font-size: 30px;
-                line-height: 32px;
-            }
-        }
-        .store-name {
-            color: white;
-            font-weight: bold;
-            margin-bottom: 12px;
-            white-space: pre-wrap;
-            text-align: center;
-            line-height: 1.25;
-        }
-        .store-name.short { font-size: 12px; }
-        .store-name.medium { font-size: 11px; }
-        .store-name.long { font-size: 10px; }
-        .store-name.extra-long { font-size: 9px; }
-        @media (min-width: 640px) {
-            .store-name {
-                margin-bottom: 16px;
-            }
-            .store-name.short { font-size: 14px; }
-            .store-name.medium { font-size: 13px; }
-            .store-name.long { font-size: 12px; }
-            .store-name.extra-long { font-size: 11px; }
-        }
-        @media (min-width: 768px) {
-            .store-name {
-                margin-bottom: 20px;
-            }
-            .store-name.short { font-size: 18px; }
-            .store-name.medium { font-size: 16px; }
-            .store-name.long { font-size: 14px; }
-            .store-name.extra-long { font-size: 12px; }
-        }
-        @media (min-width: 1024px) {
-            .store-name {
-                margin-bottom: 24px;
-            }
-            .store-name.short { font-size: 24px; }
-            .store-name.medium { font-size: 20px; }
-            .store-name.long { font-size: 16px; }
-            .store-name.extra-long { font-size: 14px; }
-        }
-        .menu-section {
-            flex: 1;
-            padding-left: 0;
-            padding-right: 0;
-            margin-left: 0;
-            margin-right: 0;
-            letter-spacing: normal;
-            line-height: 1.75;
-            border: 0;
-            background: rgba(34, 34, 34, 1);
-        }
-        .menu-item {
-            display: flex;
-            align-items: center;
-            padding: 8px 8px;
-            border-left: 4px solid rgb(6, 182, 212);
-            margin-left: 4px;
-            margin-right: 4px;
-            border-radius: 0 4px 4px 0;
-            background: rgba(61, 61, 61, 1);
-            white-space: nowrap;
-        }
-        @media (min-width: 640px) {
-            .menu-item {
-                padding: 10px 12px;
-                margin-left: 6px;
-                margin-right: 6px;
-            }
-        }
-        @media (min-width: 768px) {
-            .menu-item {
-                padding: 12px 16px;
-                margin-left: 8px;
-                margin-right: 8px;
-            }
-        }
-        .bell-icon {
-            margin-right: 4px;
-            width: 12px;
-            height: 12px;
-            object-fit: contain;
-            filter: brightness(0) invert(1);
-        }
-        @media (min-width: 640px) {
-            .bell-icon {
-                margin-right: 6px;
-                width: 16px;
-                height: 16px;
-            }
-        }
-        @media (min-width: 768px) {
-            .bell-icon {
-                margin-right: 8px;
-                width: 20px;
-                height: 20px;
-            }
-        }
-        @media (min-width: 1024px) {
-            .bell-icon {
-                width: 24px;
-                height: 24px;
-            }
-        }
-        .menu-text {
-            font-size: 12px;
-            letter-spacing: normal;
-            font-weight: 800;
-            line-height: 1.5;
-            white-space: nowrap;
-        }
-        @media (min-width: 640px) {
-            .menu-text {
-                font-size: 14px;
-                line-height: 2;
-            }
-        }
-        @media (min-width: 768px) {
-            .menu-text {
-                font-size: 16px;
-                line-height: 2.5;
-            }
-        }
-        .call-button {
-            position: absolute;
-            bottom: 12px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgb(6, 182, 212);
-            color: white;
-            font-weight: bold;
-            border-radius: 9999px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            font-size: 12px;
-            line-height: 12px;
-            letter-spacing: normal;
-            height: 48px;
-            width: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            border: none;
-            cursor: pointer;
-        }
-        @media (min-width: 640px) {
-            .call-button {
-                bottom: 16px;
-                font-size: 14px;
-                line-height: 16px;
-                height: 64px;
-                width: 64px;
-            }
-        }
-        @media (min-width: 768px) {
-            .call-button {
-                bottom: 20px;
-                font-size: 16px;
-                line-height: 20px;
-                height: 80px;
-                width: 80px;
-            }
-        }
-        @media (min-width: 1024px) {
-            .call-button {
-                bottom: 24px;
-                font-size: 20px;
-                line-height: 28px;
-                height: 96px;
-                width: 96px;
-            }
-        }
-        .call-button:hover {
-            background: rgb(8, 145, 178);
-        }
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-        .tabs-container {
-            background: transparent;
-            border-bottom: 1px solid rgb(229, 231, 235);
-        }
-        .tabs {
-            display: flex;
-            padding-left: 8px;
-            padding-top: 8px;
-        }
-        @media (min-width: 640px) {
-            .tabs {
-                padding-left: 12px;
-                padding-top: 12px;
-            }
-        }
-        @media (min-width: 768px) {
-            .tabs {
-                padding-left: 16px;
-                padding-top: 16px;
-            }
-        }
-        @media (min-width: 1024px) {
-            .tabs {
-                padding-left: 24px;
-            }
-        }
-        .tab {
-            padding: 8px 8px;
-            font-size: 12px;
-            font-weight: bold;
-            border-bottom: 4px solid transparent;
-            transition: all 0.2s;
-            margin-right: 8px;
-            cursor: pointer;
-            color: rgb(75, 85, 99);
-            background: transparent;
-        }
-        @media (min-width: 640px) {
-            .tab {
-                padding: 10px 12px;
-                font-size: 14px;
-                margin-right: 16px;
-            }
-        }
-        @media (min-width: 768px) {
-            .tab {
-                padding: 12px 16px;
-                font-size: 16px;
-                margin-right: 24px;
-            }
-        }
-        @media (min-width: 1024px) {
-            .tab {
-                padding: 12px 24px;
-                font-size: 18px;
-                margin-right: 32px;
-            }
-        }
-        .tab:hover {
-            color: rgb(31, 41, 55);
-        }
-        .tab.active {
-            color: rgb(6, 182, 212);
-            border-bottom-color: rgb(6, 182, 212);
-        }
-        .content-area {
-            flex: 1;
-            padding: 8px;
-            border: 0;
-            line-height: 1.75;
-            letter-spacing: normal;
-            display: flex;
-            flex-direction: column;
-        }
-        .menu-scroll-container {
-            flex: 1;
-            overflow-y: auto;
-            max-height: 400px;
-            height: calc(100% - 160px);
-        }
-        @media (min-width: 768px) {
-            .menu-scroll-container {
-                max-height: 500px;
-            }
-        }
-        @media (min-width: 640px) {
-            .content-area {
-                padding: 12px;
-            }
-        }
-        @media (min-width: 768px) {
-            .content-area {
-                padding: 16px;
-            }
-        }
-        @media (min-width: 1024px) {
-            .content-area {
-                padding: 24px;
-            }
-        }
-        .section-title {
-            font-weight: bold;
-            color: rgb(75, 85, 99);
-            margin-bottom: 12px;
-            font-size: 14px;
-        }
-        @media (min-width: 640px) {
-            .section-title {
-                margin-bottom: 16px;
-                font-size: 18px;
-            }
-        }
-        @media (min-width: 768px) {
-            .section-title {
-                margin-bottom: 20px;
-                font-size: 24px;
-            }
-        }
-        @media (min-width: 1024px) {
-            .section-title {
-                margin-bottom: 24px;
-                font-size: 32px;
-            }
-        }
-        .menu-grid {
-            display: grid;
-            grid-template-columns: repeat(1, 1fr);
-            gap: 8px;
-        }
-        @media (min-width: 640px) {
-            .menu-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 12px;
-            }
-        }
-        @media (min-width: 1024px) {
-            .menu-grid {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 24px;
-            }
-        }
-        .menu-card {
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            transition: box-shadow 0.2s;
-            border-radius: 8px;
-            background: white;
-            height: 450px;
-            display: flex;
-            flex-direction: column;
-        }
-        @media (min-width: 640px) {
-            .menu-card {
-                height: 500px;
-            }
-        }
-        @media (min-width: 768px) {
-            .menu-card {
-                height: 550px;
-            }
-        }
-        @media (min-width: 1024px) {
-            .menu-card {
-                height: 600px;
-            }
-        }
-        .menu-card:hover {
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-        .menu-image-container {
-            position: relative;
-        }
-        .menu-image {
-            width: 100%;
-            height: 170px;
-            object-fit: cover;
-        }
-        @media (min-width: 640px) {
-            .menu-image {
-                height: 200px;
-            }
-        }
-        @media (min-width: 768px) {
-            .menu-image {
-                height: 220px;
-            }
-        }
-        @media (min-width: 1024px) {
-            .menu-image {
-                height: 240px;
-            }
-        }
-        .badge {
-            position: absolute;
-            top: 4px;
-            right: 4px;
-            background: rgb(31, 41, 55);
-            color: white;
-            padding: 2px 4px;
-            font-size: 12px;
-            border-radius: 2px;
-        }
-        @media (min-width: 640px) {
-            .badge {
-                top: 8px;
-                right: 8px;
-            }
-        }
-        @media (min-width: 768px) {
-            .badge {
-                top: 12px;
-                right: 12px;
-            }
-        }
-        .menu-info {
-            padding: 8px;
-            padding-bottom: 14px;
-            flex: 1;
-            min-height: 120px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        @media (min-width: 640px) {
-            .menu-info {
-                padding: 12px;
-                padding-bottom: 14px;
-                min-height: 140px;
-            }
-        }
-        @media (min-width: 768px) {
-            .menu-info {
-                padding: 16px;
-                padding-bottom: 18px;
-                min-height: 140px;
-            }
-        }
-        @media (min-width: 1024px) {
-            .menu-info {
-                min-height: 160px;
-            }
-        }
-        .menu-name {
-            font-weight: 500;
-            font-size: 14px;
-            margin-bottom: 8px;
-            overflow: hidden;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-        }
-        @media (min-width: 640px) {
-            .menu-name {
-                font-size: 16px;
-                margin-bottom: 10px;
-            }
-        }
-        @media (min-width: 768px) {
-            .menu-name {
-                font-size: 18px;
-                margin-bottom: 12px;
-            }
-        }
-        .price-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 12px;
-        }
-        .menu-price {
-            font-size: 14px;
-            font-weight: bold;
-        }
-        @media (min-width: 640px) {
-            .menu-price {
-                font-size: 16px;
-            }
-        }
-        @media (min-width: 768px) {
-            .menu-price {
-                font-size: 18px;
-            }
-        }
-        .add-button {
-            background: rgb(31, 41, 55);
-            color: white;
-            padding: 4px 8px;
-            font-weight: 500;
-            font-size: 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        @media (min-width: 640px) {
-            .add-button {
-                padding: 6px 12px;
-                font-size: 13px;
-            }
-        }
-        @media (min-width: 768px) {
-            .add-button {
-                padding: 6px 16px;
-                font-size: 14px;
-            }
-        }
-        @media (min-width: 1024px) {
-            .add-button {
-                padding: 8px 24px;
-            }
-        }
-        .add-button:hover {
-            background: rgb(55, 65, 81);
-        }
-        
-        /* 하단 액션바 */
-        .action-bar {
-            background: white;
-            border-top: 1px solid rgb(229, 231, 235);
-            padding: 8px;
-            display: flex;
-            align-items: end;
-            justify-content: end;
-        }
-        @media (min-width: 640px) {
-            .action-bar {
-                padding: 12px;
-            }
-        }
-        @media (min-width: 768px) {
-            .action-bar {
-                padding: 16px;
-            }
-        }
-        @media (min-width: 1024px) {
-            .action-bar {
-                padding: 24px;
-            }
-        }
-        .action-buttons {
-            display: flex;
-            gap: 8px;
-        }
-        @media (min-width: 640px) {
-            .action-buttons {
-                gap: 12px;
-            }
-        }
-        @media (min-width: 768px) {
-            .action-buttons {
-                gap: 16px;
-            }
-        }
-        .order-history-btn {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            background: white;
-            border: 1px solid rgb(209, 213, 219);
-            color: rgb(75, 85, 99);
-            padding: 8px 8px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 500;
-            font-size: 12px;
-            transition: background-color 0.2s;
-        }
-        @media (min-width: 640px) {
-            .order-history-btn {
-                gap: 6px;
-                padding: 10px 12px;
-                font-size: 14px;
-            }
-        }
-        @media (min-width: 768px) {
-            .order-history-btn {
-                gap: 8px;
-                padding: 12px 16px;
-                font-size: 16px;
-            }
-        }
-        @media (min-width: 1024px) {
-            .order-history-btn {
-                padding: 12px 24px;
-            }
-        }
-        .order-history-btn:hover {
-            background: rgb(249, 250, 251);
-        }
-        .order-btn {
-            background: rgb(6, 182, 212);
-            color: black;
-            font-weight: bold;
-            font-size: 12px;
-            padding: 8px 12px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            position: relative;
-            transition: background-color 0.2s;
-        }
-        @media (min-width: 640px) {
-            .order-btn {
-                font-size: 14px;
-                padding: 10px 16px;
-            }
-        }
-        @media (min-width: 768px) {
-            .order-btn {
-                font-size: 16px;
-                padding: 12px 24px;
-            }
-        }
-        @media (min-width: 1024px) {
-            .order-btn {
-                padding: 12px 32px;
-            }
-        }
-        .order-btn:hover {
-            background: rgb(8, 145, 178);
-        }
-        .order-btn:disabled {
-            background: rgb(156, 163, 175);
-            cursor: not-allowed;
-        }
-        .cart-count {
-            position: absolute;
-            top: -4px;
-            right: -4px;
-            background: rgb(8, 145, 178);
-            color: white;
-            border-radius: 50%;
-            width: 16px;
-            height: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        @media (min-width: 640px) {
-            .cart-count {
-                top: -6px;
-                right: -6px;
-                width: 20px;
-                height: 20px;
-            }
-        }
-        @media (min-width: 768px) {
-            .cart-count {
-                top: -8px;
-                right: -8px;
-                width: 24px;
-                height: 24px;
-            }
-        }
-        
-        /* 모달 스타일 */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 50;
-        }
-        .modal-overlay.show {
-            display: flex;
-        }
-        .modal-content {
-            background: white;
-            border-radius: 12px;
-            max-width: 28rem;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        .modal-header {
-            padding: 24px 24px 0 24px;
-        }
-        .modal-title {
-            font-size: 20px;
-            font-weight: bold;
-        }
-        .modal-body {
-            padding: 16px 24px;
-        }
-        .order-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px;
-            background: rgb(249, 250, 251);
-            border-radius: 8px;
-            margin-bottom: 12px;
-        }
-        .order-item-info {
-            flex: 1;
-        }
-        .order-item-name {
-            font-weight: 500;
-            font-size: 16px;
-        }
-        .order-item-price {
-            font-size: 14px;
-            color: rgb(75, 85, 99);
-        }
-        .order-item-controls {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .order-item-total {
-            font-weight: bold;
-            font-size: 16px;
-        }
-        .remove-btn {
-            width: 32px;
-            height: 32px;
-            border: 1px solid rgb(209, 213, 219);
-            background: white;
-            border-radius: 4px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            color: rgb(75, 85, 99);
-        }
-        .remove-btn:hover {
-            background: rgb(249, 250, 251);
-        }
-        .total-section {
-            border-top: 1px solid rgb(229, 231, 235);
-            padding-top: 12px;
-            margin-top: 16px;
-        }
-        .total-price {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 18px;
-            font-weight: bold;
-        }
-        .empty-order {
-            text-align: center;
-            color: rgb(156, 163, 175);
-            padding: 32px 0;
-            font-size: 16px;
-        }
-        
-        /* 확인 모달 */
-        .confirm-modal-content {
-            background: white;
-            border-radius: 12px;
-            max-width: 24rem;
-            width: 90%;
-        }
-        .confirm-modal-header {
-            padding: 24px 24px 16px 24px;
-        }
-        .confirm-modal-title {
-            font-size: 18px;
-            font-weight: bold;
-        }
-        .confirm-modal-body {
-            padding: 0 24px 24px 24px;
-        }
-        .confirm-modal-description {
-            font-size: 16px;
-            color: rgb(75, 85, 99);
-            margin-bottom: 16px;
-        }
-        .order-summary {
-            background: rgb(249, 250, 251);
-            border-radius: 8px;
-            padding: 16px;
-        }
-        .summary-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 16px;
-        }
-        .summary-total {
-            display: flex;
-            justify-content: space-between;
-            font-weight: bold;
-            font-size: 18px;
-            border-top: 1px solid rgb(229, 231, 235);
-            padding-top: 12px;
-            margin-top: 12px;
-        }
-        .modal-footer {
-            display: flex;
-            gap: 8px;
-        }
-        .modal-btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 6px;
-            font-weight: 500;
-            font-size: 14px;
-            cursor: pointer;
-        }
-        .modal-btn-cancel {
-            background: white;
-            border: 1px solid rgb(209, 213, 219);
-            color: rgb(75, 85, 99);
-        }
-        .modal-btn-confirm {
-            background: rgb(6, 182, 212);
-            color: black;
-        }
-        .modal-btn:hover {
-            opacity: 0.9;
-        }
-    </style>
-</head>
-<body>
-    <div class="kiosk-container">
-        <div class="kiosk-content">
-            <div class="sidebar">
-                <div class="logo-section">
-                    <div class="logo">하이<br/>오더</div>
-                    <div class="store-name ${storeName.length > 20 ? 'extra-long' : storeName.length > 15 ? 'long' : storeName.length > 10 ? 'medium' : 'short'}">${storeName}</div>
-                </div>
-                <div class="menu-section">
-                    <div class="menu-item">
-                        <img src="https://cdn-icons-png.flaticon.com/256/192/192732.png" class="bell-icon" alt="메뉴주문" />
-                        <span class="menu-text">메뉴주문</span>
-                    </div>
-                </div>
-                <button class="call-button" onclick="alert('직원을 호출했습니다!')">직원<br/>호출</button>
-            </div>
-            <div class="main-content">
-                <div class="tabs-container">
-                    <div class="tabs">
-                        ${tabs.map((tab, index) => 
-                            `<div class="tab ${index === 0 ? 'active' : ''}" onclick="switchTab('${tab}')">${tab}</div>`
-                        ).join('')}
-                    </div>
-                </div>
-                <div class="content-area">
-                    <h2 class="section-title">${tabs[0]}</h2>
-                    <div class="menu-scroll-container">
-                        <div class="menu-grid" id="menu-grid">
-                        ${foodItems.filter(item => item.category === tabs[0]).map(item => `
-                            <div class="menu-card">
-                                <div class="menu-image-container">
-                                    <img src="${item.image}" alt="${item.name}" class="menu-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
-                                    <div style="display:none; width:100%; height:176px; background:#f3f4f6; align-items:center; justify-content:center; color:#9ca3af;">이미지</div>
-                                    ${item.badge ? `<div class="badge">${item.badge}</div>` : ''}
-                                </div>
-                                <div class="menu-info">
-                                    <h3 class="menu-name">${item.name}</h3>
-                                    <div class="price-container">
-                                        <span class="menu-price">${item.price}</span>
-                                        <button class="add-button" onclick="addToCart(${item.id}, '${item.name}', '${item.price}', ${item.priceNumber})">담기</button>
-                                    </div>
-                                </div>
-                            </div>
-                        `).join('')}
-                        </div>
-                    </div>
-                </div>
-                <div class="action-bar">
-                    <div class="action-buttons">
-                        <button class="order-history-btn" onclick="showOrderHistory()">
-                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                            </svg>
-                            주문내역
-                        </button>
-                        <button class="order-btn" id="order-btn" onclick="showOrderConfirm()" disabled>
-                            주문하기
-                            <div class="cart-count" id="cart-count" style="display: none;">0</div>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- 주문내역 모달 -->
-    <div class="modal-overlay" id="order-history-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">주문내역</h2>
-            </div>
-            <div class="modal-body" id="order-history-content">
-                <div class="empty-order">주문한 상품이 없습니다.</div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- 주문확인 모달 -->
-    <div class="modal-overlay" id="order-confirm-modal">
-        <div class="confirm-modal-content">
-            <div class="confirm-modal-header">
-                <h2 class="confirm-modal-title">주문 확인</h2>
-            </div>
-            <div class="confirm-modal-body">
-                <div class="confirm-modal-description">주문하시겠습니까?</div>
-                <div class="order-summary" id="order-confirm-content">
-                </div>
-                <div class="modal-footer">
-                    <button class="modal-btn modal-btn-cancel" onclick="hideOrderConfirm()">취소</button>
-                    <button class="modal-btn modal-btn-confirm" onclick="confirmOrder()">주문하기</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <script>
-        // 전역 변수
-        let orderItems = [];
-        const allMenus = ${JSON.stringify(foodItems)};
-        const tabMenus = {
-            ${tabs.map((tab, index) => `
-                "${tab}": ${JSON.stringify(foodItems.filter(item => item.category === tab))}
-            `).join(',')}
-        };
-        
-        // 탭 전환 함수
-        function switchTab(tabName) {
-            // 모든 탭 비활성화
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            // 클릭된 탭 활성화
-            event.target.classList.add('active');
-            
-            const menus = tabMenus[tabName] || [];
-            
-            // 섹션 제목 업데이트
-            document.querySelector('.section-title').textContent = tabName;
-            
-            // 메뉴 그리드 업데이트
-            const menuGrid = document.getElementById('menu-grid');
-            menuGrid.innerHTML = menus.map(item => \`
-                <div class="menu-card">
-                    <div class="menu-image-container">
-                        <img src="\${item.image}" alt="\${item.name}" class="menu-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
-                        <div style="display:none; width:100%; height:176px; background:#f3f4f6; align-items:center; justify-content:center; color:#9ca3af;">이미지</div>
-                        \${item.badge ? \`<div class="badge">\${item.badge}</div>\` : ''}
-                    </div>
-                    <div class="menu-info">
-                        <h3 class="menu-name">\${item.name}</h3>
-                        <div class="price-container">
-                            <span class="menu-price">\${item.price}</span>
-                            <button class="add-button" onclick="addToCart(\${item.id}, '\${item.name}', '\${item.price}', \${item.priceNumber})">담기</button>
-                        </div>
-                    </div>
-                </div>
-            \`).join('');
-        }
-        
-        // 장바구니에 추가
-        function addToCart(id, name, price, priceNumber) {
-            const existingItem = orderItems.find(item => item.id === id);
-            
-            if (existingItem) {
-                existingItem.quantity += 1;
-            } else {
-                orderItems.push({
-                    id: id,
-                    name: name,
-                    price: price,
-                    priceNumber: priceNumber,
-                    quantity: 1
-                });
-            }
-            
-            updateCartUI();
-        }
-        
-        // 장바구니에서 제거
-        function removeFromCart(id) {
-            const item = orderItems.find(item => item.id === id);
-            if (item) {
-                if (item.quantity > 1) {
-                    item.quantity -= 1;
-                } else {
-                    orderItems = orderItems.filter(item => item.id !== id);
-                }
-            }
-            updateCartUI();
-            updateOrderHistoryModal();
-        }
-        
-        // 장바구니 UI 업데이트
-        function updateCartUI() {
-            const totalCount = orderItems.reduce((sum, item) => sum + item.quantity, 0);
-            const cartCountEl = document.getElementById('cart-count');
-            const orderBtnEl = document.getElementById('order-btn');
-            
-            if (totalCount > 0) {
-                cartCountEl.textContent = totalCount;
-                cartCountEl.style.display = 'flex';
-                orderBtnEl.disabled = false;
-            } else {
-                cartCountEl.style.display = 'none';
-                orderBtnEl.disabled = true;
-            }
-        }
-        
-        // 총 금액 계산
-        function getTotalPrice() {
-            return orderItems.reduce((sum, item) => sum + (item.priceNumber * item.quantity), 0);
-        }
-        
-        // 주문내역 모달 표시
-        function showOrderHistory() {
-            updateOrderHistoryModal();
-            document.getElementById('order-history-modal').classList.add('show');
-        }
-        
-        // 주문내역 모달 업데이트
-        function updateOrderHistoryModal() {
-            const content = document.getElementById('order-history-content');
-            
-            if (orderItems.length === 0) {
-                content.innerHTML = '<div class="empty-order">주문한 상품이 없습니다.</div>';
-                return;
-            }
-            
-            const itemsHtml = orderItems.map(item => \`
-                <div class="order-item">
-                    <div class="order-item-info">
-                        <div class="order-item-name">\${item.name} x \${item.quantity}</div>
-                        <div class="order-item-price">\${item.price}</div>
-                    </div>
-                    <div class="order-item-controls">
-                        <div class="order-item-total">\${(item.priceNumber * item.quantity).toLocaleString()}원</div>
-                        <button class="remove-btn" onclick="removeFromCart(\${item.id})">×</button>
-                    </div>
-                </div>
-            \`).join('');
-            
-            const totalHtml = \`
-                <div class="total-section">
-                    <div class="total-price">
-                        <span>총 금액</span>
-                        <span>\${getTotalPrice().toLocaleString()}원</span>
-                    </div>
-                </div>
-            \`;
-            
-            content.innerHTML = itemsHtml + totalHtml;
-        }
-        
-        // 주문확인 모달 표시
-        function showOrderConfirm() {
-            if (orderItems.length === 0) return;
-            
-            const content = document.getElementById('order-confirm-content');
-            
-            const itemsHtml = orderItems.map(item => \`
-                <div class="summary-item">
-                    <span>\${item.name} x \${item.quantity}</span>
-                    <span>\${(item.priceNumber * item.quantity).toLocaleString()}원</span>
-                </div>
-            \`).join('');
-            
-            const totalHtml = \`
-                <div class="summary-total">
-                    <span>총 금액</span>
-                    <span>\${getTotalPrice().toLocaleString()}원</span>
-                </div>
-            \`;
-            
-            content.innerHTML = itemsHtml + totalHtml;
-            document.getElementById('order-confirm-modal').classList.add('show');
-        }
-        
-        // 모달 숨기기
-        function hideOrderHistory() {
-            document.getElementById('order-history-modal').classList.remove('show');
-        }
-        
-        function hideOrderConfirm() {
-            document.getElementById('order-confirm-modal').classList.remove('show');
-        }
-        
-        // 주문 확정
-        function confirmOrder() {
-            alert('주문이 완료되었습니다!');
-            orderItems = [];
-            updateCartUI();
-            hideOrderConfirm();
-        }
-        
-        // 모달 배경 클릭 시 닫기
-        document.querySelectorAll('.modal-overlay').forEach(modal => {
-            modal.addEventListener('click', function(e) {
-                if (e.target === this) {
-                    this.classList.remove('show');
-                }
-            });
-        });
-        
-        // ESC 키로 모달 닫기
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                document.querySelectorAll('.modal-overlay').forEach(modal => {
-                    modal.classList.remove('show');
-                });
-            }
-        });
-    </script>
-</body>
-</html>`
-
-    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `토탈프로_시뮬레이터_${storeName.replace(/\n/g, '_')}_${currentDate}.html`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
-  }
+  // 메뉴판 초기화 함수 추가
+  const handleResetMenu = () => {
+    if (confirm('메뉴판을 초기 상태로 되돌리시겠습니까?')) {
+      setFoodItems([{
+        id: 1,
+        name: "메뉴",
+        price: "0원",
+        priceNumber: 0,
+        image: "/placeholder.svg?height=180&width=280",
+        category: "메인메뉴",
+        description: "맛있는 메뉴입니다"
+      }]);
+      setActiveTab("메인메뉴");
+      setTabs(["메인메뉴", "사이드", "음료"]);
+    }
+  };
 
   return (
     <div className={`w-full h-screen bg-gray-200 flex items-center justify-center overflow-hidden ${isMobile || isTablet ? 'p-0' : 'p-1 sm:p-4 md:p-8 lg:p-[10%]'}`}>
@@ -1773,6 +624,27 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
             style={{ marginRight: isMobile || isTablet ? '0px' : '5px' }}
           >
             <Download className={`${
+              isMobile && !isLandscape ? 'w-5 h-5' :
+              isMobile && isLandscape ? 'w-4 h-4' :
+              isTablet ? 'w-6 h-6' :
+              'w-4 sm:w-5 md:w-6 h-4 sm:h-5 md:h-6'
+            }`} />
+          </Button>
+
+          {/* Reset Button - 우측 상단 */}
+          <Button
+            onClick={handleResetMenu}
+            className={`absolute z-10 bg-yellow-600 hover:bg-yellow-700 text-white rounded-full ${
+              isMobile && !isLandscape ? 'top-3 right-[8.5rem] p-2' :
+              isMobile && isLandscape ? 'top-2 right-[7.25rem] p-1.5' :
+              isTablet ? 'top-3 right-[8.5rem] p-2' :
+              'top-2 sm:top-3 md:top-4 right-[7.5rem] sm:right-[8.5rem] md:right-[9.5rem] lg:right-[10.5rem] p-1 sm:p-1.5 md:p-2'
+            }`}
+            size="sm"
+            title="메뉴판 초기화"
+            style={{ marginRight: isMobile || isTablet ? '0px' : '5px' }}
+          >
+            <RefreshCw className={`${
               isMobile && !isLandscape ? 'w-5 h-5' :
               isMobile && isLandscape ? 'w-4 h-4' :
               isTablet ? 'w-6 h-6' :
@@ -1870,14 +742,15 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
               }}>
                 <div className={`grid ${isMobile && !isLandscape ? 'grid-cols-3 gap-3' : isMobile && isLandscape ? 'grid-cols-3 gap-3' : isTablet ? 'grid-cols-3 gap-4' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4 lg:gap-6'}`}>
                   {filteredFoodItems.map((item) => (
-                    <Card key={item.id} className={`overflow-hidden shadow-md hover:shadow-lg transition-shadow ${isMobile && !isLandscape ? 'h-56' : isMobile && isLandscape ? 'h-44' : isTablet ? 'h-68' : 'h-52 sm:h-56 md:h-60 lg:h-64'}`}>
-                      <div className="relative">
+                    <Card key={item.id} className={`overflow-hidden shadow-md hover:shadow-lg transition-shadow ${isMobile && !isLandscape ? 'h-64' : isMobile && isLandscape ? 'h-48' : isTablet ? 'h-72' : 'h-56 sm:h-60 md:h-64 lg:h-72'}`}>
+                      <div className="relative h-3/5">
                         <Image
                           src={item.image || "/placeholder.svg"}
                           alt={item.name}
                           width={280}
                           height={180}
-                          className={`w-full object-cover ${isMobile && !isLandscape ? 'h-32' : isMobile && isLandscape ? 'h-28' : isTablet ? 'h-40' : 'h-28 sm:h-32 md:h-36 lg:h-40'}`}
+                          className="w-full h-full object-cover"
+                          style={{ objectPosition: 'center 50%', objectFit: 'cover' }}
                         />
                         {item.badge && (
                           <Badge className="absolute top-1 sm:top-2 md:top-3 right-1 sm:right-2 md:right-3 bg-gray-800 text-white px-1 sm:px-2 py-0.5 sm:py-1 text-xs">
@@ -1885,8 +758,8 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
                           </Badge>
                         )}
                       </div>
-                      <CardContent className={`${isMobile && !isLandscape ? 'p-3 pb-12 h-auto min-h-28' : isMobile && isLandscape ? 'p-3 pb-10 h-auto min-h-20' : isTablet ? 'p-4 pb-4 h-auto min-h-24' : 'p-2 sm:p-3 md:p-4 pb-10 sm:pb-12 md:pb-14 h-auto min-h-24'} flex flex-col justify-between`}>
-                        <h3 className={`font-medium ${isMobile && !isLandscape ? 'text-base mb-1' : isMobile && isLandscape ? 'text-base mb-1' : isTablet ? 'text-base mb-1' : 'text-base sm:text-base md:text-lg mb-1'} leading-tight text-gray-900`}>
+                      <CardContent className="h-2/5 flex flex-col justify-between p-2 sm:p-3">
+                        <h3 className={`font-medium ${getMenuNameFontSize(item.name)} text-gray-900 break-keep line-clamp-2`}>
                           {item.name}
                         </h3>
                         <div className="flex items-center justify-between mt-auto">
@@ -2396,6 +1269,59 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
                     className="flex-1 bg-cyan-400 hover:bg-cyan-500 text-black"
                   >
                     저장
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* 네이버 메뉴 불러오기 모달 */}
+          <Dialog open={showImportModal} onOpenChange={setShowImportModal}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-bold">네이버 메뉴 불러오기</DialogTitle>
+              </DialogHeader>
+              <div className="mt-4 space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="placeId" className="text-sm font-medium">
+                    네이버 플레이스 매장 ID
+                  </Label>
+                  <Input
+                    id="placeId"
+                    value={importPlaceId}
+                    onChange={(e) => setImportPlaceId(e.target.value)}
+                    placeholder="예: 1234567890"
+                    className="w-full"
+                  />
+                  <p className="text-sm text-gray-500">
+                    매장 URL의 "restaurant/" 다음에 오는 숫자를 입력해주세요.<br/>
+                    예시: https://pcmap.place.naver.com/restaurant/1234567890/menu/list
+                  </p>
+                </div>
+                <div className="flex gap-2 pt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowImportModal(false);
+                      setImportPlaceId("");
+                    }}
+                    className="flex-1"
+                  >
+                    취소
+                  </Button>
+                  <Button
+                    onClick={handleImportMenu}
+                    className="flex-1 bg-cyan-400 hover:bg-cyan-500 text-black"
+                    disabled={isImporting}
+                  >
+                    {isImporting ? (
+                      <>
+                        <div className="animate-spin w-4 h-4 border-2 border-black border-t-transparent rounded-full mr-2"></div>
+                        불러오는 중...
+                      </>
+                    ) : (
+                      "메뉴 불러오기"
+                    )}
                   </Button>
                 </div>
               </div>
