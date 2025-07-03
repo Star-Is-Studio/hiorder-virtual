@@ -395,7 +395,7 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
       return
     }
     const searchQuery = encodeURIComponent(storeName.replace(/\n/g, ' ').trim())
-    const mapUrl = `https://map.naver.com/p/search/${searchQuery}`
+    const mapUrl = `https://m.map.naver.com/search?query=${searchQuery},${storeAddress}`
     window.open(mapUrl, '_blank')
   }
 
@@ -620,7 +620,7 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
               'top-2 sm:top-3 md:top-4 right-[2.5rem] sm:right-[3rem] md:right-[3.5rem] lg:right-[4rem] p-1 sm:p-1.5 md:p-2'
             }`}
             size="sm"
-            title="HTML 파일 다운로드"
+            title="메뉴판 불러오기"
             style={{ marginRight: isMobile || isTablet ? '0px' : '5px' }}
           >
             <Download className={`${
@@ -742,7 +742,7 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
               }}>
                 <div className={`grid ${isMobile && !isLandscape ? 'grid-cols-3 gap-3' : isMobile && isLandscape ? 'grid-cols-3 gap-3' : isTablet ? 'grid-cols-3 gap-4' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4 lg:gap-6'}`}>
                   {filteredFoodItems.map((item) => (
-                    <Card key={item.id} className={`overflow-hidden shadow-md hover:shadow-lg transition-shadow ${isMobile && !isLandscape ? 'h-64' : isMobile && isLandscape ? 'h-48' : isTablet ? 'h-72' : 'h-56 sm:h-60 md:h-64 lg:h-72'}`}>
+                    <Card key={item.id} className={`overflow-hidden shadow-md hover:shadow-lg transition-shadow ${isMobile && !isLandscape ? 'h-64' : isMobile && isLandscape ? 'h-[207px]' : isTablet ? 'h-72' : 'h-56 sm:h-60 md:h-64 lg:h-72'}`}>
                       <div className="relative h-3/5">
                         <Image
                           src={item.image || "/placeholder.svg"}
@@ -759,7 +759,7 @@ export default function Component({ initialStoreName }: ComponentProps = {}) {
                         )}
                       </div>
                       <CardContent className="h-2/5 flex flex-col justify-between p-2 sm:p-3">
-                        <h3 className={`font-medium ${getMenuNameFontSize(item.name)} text-gray-900 break-keep line-clamp-2`}>
+                        <h3 className={`font-medium ${getMenuNameFontSize(item.name)} text-gray-900 break-keep line-clamp-2 mt-[-5px]`}>
                           {item.name}
                         </h3>
                         <div className="flex items-center justify-between mt-auto">
