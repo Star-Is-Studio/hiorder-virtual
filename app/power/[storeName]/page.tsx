@@ -27,11 +27,11 @@ export default function PowerPage({ params }: PageProps) {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (password === '0827') {
+    if (password === '1025') {
       setIsAuthenticated(true)
       setError('')
     } else {
-      setError('비밀번호가 틀렸습니다.')
+      setError('접속코드가 틀렸습니다.')
       setPassword('')
     }
   }
@@ -46,7 +46,7 @@ export default function PowerPage({ params }: PageProps) {
         <CardHeader className="text-center">
           <div className="text-6xl mb-4">🏢</div>
           <CardTitle className="text-4xl font-bold text-gray-800 mb-2">토탈프로</CardTitle>
-          <CardDescription className="text-2xl text-gray-600 mb-4">시뮬레이터</CardDescription>
+          <CardDescription className="text-2xl text-gray-600 mb-4">가상메뉴판</CardDescription>
           <div className="text-lg font-medium text-blue-600 bg-blue-50 p-3 rounded-lg border">
             매장: {decodedStoreName}
           </div>
@@ -55,7 +55,7 @@ export default function PowerPage({ params }: PageProps) {
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
               <label htmlFor="password" className="text-sm font-medium text-gray-700">
-                비밀번호
+              접속코드
               </label>
               <div className="relative">
                 <Input
@@ -63,7 +63,7 @@ export default function PowerPage({ params }: PageProps) {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="비밀번호를 입력하세요"
+                  placeholder="접속코드를 입력하세요"
                   className="pr-10"
                 />
                 <Button

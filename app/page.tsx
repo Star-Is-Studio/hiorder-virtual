@@ -13,11 +13,11 @@ export default function Page() {
   const [error, setError] = useState("")
 
   const handleLogin = () => {
-    if (password === "0827") {
+    if (password === "1025") {
       setIsLoggedIn(true)
       setError("")
     } else {
-      setError("비밀번호가 틀렸습니다.")
+      setError("접속코드가 틀렸습니다.")
       setPassword("")
     }
   }
@@ -40,20 +40,20 @@ export default function Page() {
         <CardHeader className="text-center pb-2">
           <div className="text-6xl mb-4">🏢</div>
           <h1 className="text-4xl font-bold text-gray-800 mb-2">토탈프로</h1>
-          <p className="text-gray-600 text-lg">시뮬레이터</p>
+          <p className="text-gray-600 text-lg">가상메뉴판</p>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-4">
             <div className="text-center">
               <label className="text-lg font-medium text-gray-700 block mb-3">
-                비밀번호를 입력하세요
+              접속코드를 입력하세요
               </label>
               <Input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="비밀번호"
+                placeholder="접속코드"
                 className="text-center text-xl py-3 tracking-widest"
                 maxLength={4}
                 autoFocus
@@ -78,8 +78,8 @@ export default function Page() {
           </div>
           
           <div className="text-center text-sm text-gray-500 pt-4 border-t">
-            시뮬레이터에 접근하려면<br />
-            관리자 비밀번호가 필요합니다
+            가상메뉴판에 접근하려면<br />
+            접속코드가 필요합니다
           </div>
         </CardContent>
       </Card>
