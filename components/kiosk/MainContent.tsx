@@ -64,13 +64,13 @@ export const MainContent = () => {
       <div
         className={`flex-1 ${
           isMobile && !isLandscape
-            ? "p-4"
+            ? "pt-4 pr-4 pl-4 pb-0"
             : isMobile && isLandscape
-            ? "p-3"
+            ? "pt-3 pr-3 pl-3 pb-0"
             : isTablet
-            ? "p-4"
-            : "p-2 sm:p-3 md:p-4 lg:p-6"
-        } flex flex-col border-0 leading-7 tracking-normal overflow-hidden`}
+            ? "pt-4 pr-4 pl-4 pb-0"
+            : "sm:pt-3 sm:pr-3 sm:pl-3 md:pt-4 md:pr-4 md:pl-4 lg:pt-6 lg:pr-6 lg:pl-6 pb-0"
+        } flex flex-col border-0 leading-7 tracking-normal overflow-hidden `}
       >
         <h2
           className={`font-bold text-gray-600 ${
@@ -91,12 +91,12 @@ export const MainContent = () => {
           style={{
             maxHeight:
               isMobile && !isLandscape
-                ? "calc(100vh - 125px)" // 모바일 세로: 메뉴 카드가 커진만큼 더 넓게
+                ? "calc(90vh - 125px)" // 모바일 세로: 메뉴 카드가 커진만큼 더 넓게
                 : isMobile && isLandscape
-                ? "calc(100vh - 95px)" // 모바일 가로: 더 넓게
+                ? "calc(78vh - 95px)" // 모바일 가로: 더 넓게
                 : isTablet
-                ? "calc(100vh - 130px)" // 태블릿: 더 넓게
-                : "calc(100vh - 195px)", // 데스크톱: 약간 더 넓게
+                ? "calc(78vh - 130px)" // 태블릿: 더 넓게
+                : "calc(78vh - 195px)", // 데스크톱: 약간 더 넓게
           }}
         >
           <div

@@ -46,9 +46,9 @@ export default function Page() {
           <div className="space-y-4">
             <div className="text-center">
               <label className="text-lg font-medium text-gray-700 block mb-3">
-              접속코드를 입력하세요
+              토탈프로 App으로 접속해주세요!
               </label>
-              <Input
+              {/* <Input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -57,7 +57,7 @@ export default function Page() {
                 className="text-center text-xl py-3 tracking-widest"
                 maxLength={4}
                 autoFocus
-              />
+              /> */}
             </div>
             
             {error && (
@@ -68,19 +68,19 @@ export default function Page() {
               </Alert>
             )}
             
-            <Button 
+            {/* <Button 
               onClick={handleLogin}
               className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 text-lg"
               size="lg"
             >
               로그인
-            </Button>
+            </Button> */}
           </div>
           
-          <div className="text-center text-sm text-gray-500 pt-4 border-t">
+          {/* <div className="text-center text-sm text-gray-500 pt-4 border-t">
             가상메뉴판에 접근하려면<br />
             접속코드가 필요합니다
-          </div>
+          </div> */}
         </CardContent>
       </Card>
     </div>
