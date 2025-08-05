@@ -72,7 +72,7 @@ export const StoreSettingsDialog = () => {
           <TabsContent value="store" className="space-y-4 mt-4">
             <div className="space-y-2">
               <Label htmlFor="storeName" className="text-sm font-medium">
-                매장명
+                매장명(변경은 토탈프로에서 수정 후 접속해주세요!)
               </Label>
               <Textarea
                 id="storeName"
@@ -81,11 +81,12 @@ export const StoreSettingsDialog = () => {
                 placeholder="매장명을 입력하세요(엔터가능)"
                 className="w-full resize-none"
                 rows={3}
+                readOnly
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="storeAddress" className="text-sm font-medium">
-                주소(선택)
+                주소(다른 메뉴판과 구분하기 위해 입력해주세요.)
               </Label>
               <Input
                 id="storeAddress"
